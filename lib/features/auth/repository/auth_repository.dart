@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -47,10 +46,11 @@ class AuthRepository {
           await _auth.signInWithCredential(credential);
 
       UserModel userModel;
-      print(userCredential.additionalUserInfo!.isNewUser);
+      // print(userCredential.additionalUserInfo!.isNewUser);
       if (userCredential.additionalUserInfo!.isNewUser) {
         userModel = UserModel(
           name: userCredential.user!.displayName ?? "no name",
+          email: userCredential.user!.email ?? "notfound@email.com",
           profilePic: userCredential.user!.photoURL ?? 'assets/defaultUser.jpg',
           uid: userCredential.user!.uid,
           isAuthenticated: true,
@@ -59,10 +59,9 @@ class AuthRepository {
           section: Section.c,
           rollNO: "22481A05F2",
         );
-        debugPrint(userCredential.user!.email.toString());
+        // print(userCredential.user!.email.toString());
         await _users.doc(userCredential.user!.uid).set(userModel.toMap());
       } else {
-        debugPrint("Loggging in22222222222222222222222222222222");
         userModel = await getUserData(userCredential.user!.uid).first;
       }
       return right(userModel);

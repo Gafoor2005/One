@@ -7,6 +7,13 @@ import 'package:one/features/auth/widgets/sign_in_button.dart';
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
 
+  void signInWithGoogle(BuildContext context, WidgetRef ref) {
+    ref.read(authControllerProvider.notifier).signInWithGoogle(context);
+    // ref.read(authControllerProvider).signInWithGoogle(context);
+    // Navigator.of(context)
+    //     .push(MaterialPageRoute(builder: (context) => const HomePage()));
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // ref.watch(authProvider).authStateChanges().listen((User? user) {
@@ -18,25 +25,50 @@ class LoginPage extends ConsumerWidget {
     // });
 
     final isLoading = ref.watch(authControllerProvider);
+    // late final User? loginStatus;
+    // ref.watch(authStateChangeProvider).whenData((value) => loginStatus = value);
 
-    return Scaffold(
-      body: isLoading
-          ? const Loader()
-          : SafeArea(
-              child: Column(
-                children: [
-                  const Spacer(
-                    flex: 2,
-                  ),
-                  Image.asset("assets/logo.jpg"),
-                  const Spacer(),
-                  const SignInButton(),
-                  const Spacer(
-                    flex: 2,
-                  ),
-                ],
+    return Builder(builder: (context) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: isLoading
+            ? const Loader()
+            : SafeArea(
+                child: Column(
+                  children: [
+                    const Spacer(
+                      flex: 2,
+                    ),
+                    const CircleAvatar(
+                      backgroundImage: AssetImage("assets/logo.jpg"),
+                      radius: 100,
+                    ),
+                    const Spacer(),
+                    SignInButton(onTap: () {
+                      signInWithGoogle(context, ref);
+                    }),
+                    // const LogOutButton(),
+                    // Text(
+                    //   loginStatus == null
+                    //       ? "Loged Out"
+                    //       : "logged in as ${loginStatus!.email}",
+                    // ),
+                    const Spacer(
+                      flex: 2,
+                    ),
+                  ],
+                ),
               ),
-            ),
-    );
+      );
+    });
   }
 }
+
+
+
+// listening stream provider
+// ref.watch(authStateChangeProvider).when(
+//   data: (data) => Text(data.toString()),
+//   error: (error, stackTrace) => Text('err: $error , stackTrace: $stackTrace'),
+//   loading: () => const CircularProgressIndicator(),
+// ),

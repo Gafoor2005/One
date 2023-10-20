@@ -5,6 +5,7 @@ class UserModel {
   final String name;
   final String profilePic;
   final String uid;
+  final String email;
   final bool isAuthenticated;
   final Batch year;
   final Department department;
@@ -14,6 +15,7 @@ class UserModel {
     required this.name,
     required this.profilePic,
     required this.uid,
+    required this.email,
     required this.isAuthenticated,
     required this.year,
     required this.department,
@@ -25,6 +27,7 @@ class UserModel {
     String? name,
     String? profilePic,
     String? uid,
+    String? email,
     bool? isAuthenticated,
     Batch? year,
     Department? department,
@@ -35,6 +38,7 @@ class UserModel {
       name: name ?? this.name,
       profilePic: profilePic ?? this.profilePic,
       uid: uid ?? this.uid,
+      email: email ?? this.email,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       year: year ?? this.year,
       department: department ?? this.department,
@@ -48,6 +52,7 @@ class UserModel {
       'name': name,
       'profilePic': profilePic,
       'uid': uid,
+      'email': email,
       'isAuthenticated': isAuthenticated,
       'year': year.toMap(),
       'department': department.name,
@@ -61,29 +66,23 @@ class UserModel {
       name: map['name'] as String,
       profilePic: map['profilePic'] as String,
       uid: map['uid'] as String,
+      email: map['email'] as String,
       isAuthenticated: map['isAuthenticated'] as bool,
-      year: Batch.fromMap(map['year']),
+      year: Batch.fromMap(map['year'] as Map<String, dynamic>),
       department: departmentFromString(map['department']) as Department,
       section: sectionFromString(map['section']) as Section,
       rollNO: map['rollNO'] as String,
     );
   }
 
-  String toJson() {
-    // final a = toMap();
-    // // Converting enum instance into string then into json
-    // a['department'] = a['department'].toString();
-    // a['section'] = a['section'].toString();
-
-    return json.encode(toMap());
-  }
+  String toJson() => json.encode(toMap());
 
   factory UserModel.fromJson(String source) =>
       UserModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'UserModel(name: $name, profilePic: $profilePic, uid: $uid, isAuthenticated: $isAuthenticated, year: $year, department: $department, section: $section, rollNO: $rollNO)';
+    return 'UserModel(name: $name, profilePic: $profilePic, uid: $uid, email: $email, isAuthenticated: $isAuthenticated, year: $year, department: $department, section: $section, rollNO: $rollNO)';
   }
 
   @override
@@ -93,6 +92,7 @@ class UserModel {
     return other.name == name &&
         other.profilePic == profilePic &&
         other.uid == uid &&
+        other.email == email &&
         other.isAuthenticated == isAuthenticated &&
         other.year == year &&
         other.department == department &&
@@ -105,6 +105,7 @@ class UserModel {
     return name.hashCode ^
         profilePic.hashCode ^
         uid.hashCode ^
+        email.hashCode ^
         isAuthenticated.hashCode ^
         year.hashCode ^
         department.hashCode ^
@@ -181,25 +182,26 @@ class Batch {
   int get hashCode => fromYear.hashCode ^ toYear.hashCode;
 }
 
-void main() {
-  // final Batch a = Batch(fromYear: 2022);
-  // print(a.fromYear.toString() + ' ' + a.toYear.toString());
+// void main() {
+//   // final Batch a = Batch(fromYear: 2022);
+//   // print(a.fromYear.toString() + ' ' + a.toYear.toString());
 
-  final UserModel use = UserModel(
-    name: "gafoor",
-    profilePic: "/pic",
-    uid: "uid46876",
-    isAuthenticated: true,
-    year: Batch(fromYear: 2022),
-    department: Department.cse,
-    section: Section.c,
-    rollNO: "222f2",
-  );
+//   final UserModel use = UserModel(
+//     email: "g@dfdsoio.com",
+//     name: "gafoor",
+//     profilePic: "/pic",
+//     uid: "uid46876",
+//     isAuthenticated: true,
+//     year: Batch(fromYear: 2022),
+//     department: Department.cse,
+//     section: Section.c,
+//     rollNO: "222f2",
+//   );
 
-  final a = use.toJson();
-  print(a);
-  final b = UserModel.fromJson(a);
-  print(b);
-  // print(use.department.name);
-  // print(Section.values[0].name);
-}
+//   final a = use.toJson();
+//   // print(a);
+//   final b = UserModel.fromJson(a);
+//   // print(b);
+//   // print(use.department.name);
+//   // print(Section.values[0].name);
+// }

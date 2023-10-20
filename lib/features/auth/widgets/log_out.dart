@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:one/features/auth/controller/auth_controller.dart';
 
-class SignInButton extends ConsumerWidget {
-  // final bool isFromLogin;
-  final VoidCallback onTap;
-  const SignInButton({
+class LogOutButton extends ConsumerWidget {
+  const LogOutButton({
     Key? key,
-    required this.onTap,
   }) : super(key: key);
 
-  void signIn() {
-    // print('tapped');
-    onTap();
+  void logOut(WidgetRef ref) {
+    ref.read(authControllerProvider.notifier).logout();
   }
 
   @override
@@ -20,13 +17,10 @@ class SignInButton extends ConsumerWidget {
       padding: const EdgeInsets.all(18.0),
       child: Builder(builder: (context) {
         return ElevatedButton.icon(
-          onPressed: signIn,
-          icon: Image.asset(
-            'assets/google.png',
-            width: 35,
-          ),
+          onPressed: () => logOut(ref),
+          icon: const Icon(Icons.logout_sharp, color: Colors.blue),
           label: const Text(
-            'Continue with Google',
+            'LogOut',
             style: TextStyle(fontSize: 18, color: Colors.white),
           ),
           style: ElevatedButton.styleFrom(

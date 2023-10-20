@@ -42,11 +42,11 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold(
       (l) {
-        print(l.message);
+        // print(l.message);
         showSnackBar(context, l.message);
       },
       (userModel) {
-        print(userModel);
+        // print(userModel);
         _ref.read(userProvider.notifier).update((state) => userModel);
       },
     );
@@ -58,5 +58,6 @@ class AuthController extends StateNotifier<bool> {
 
   void logout() async {
     _authRepository.logOut();
+    // _ref.read(userProvider.notifier).update((state) => null);
   }
 }
