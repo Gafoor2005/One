@@ -70,4 +70,12 @@ class PostController extends StateNotifier<bool> {
   Stream<List<Post>> fetchUserPosts() {
     return _postRepository.fetchUserPosts();
   }
+
+  Future<void> deletPost(String id) {
+    return _postRepository.deletePost(id);
+  }
+
+  Stream<Post> getPost(String id) {
+    return _postRepository.getPost(id);
+  }
 }

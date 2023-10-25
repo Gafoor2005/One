@@ -7,6 +7,7 @@ class UserModel {
   final String uid;
   final String email;
   final bool isAuthenticated;
+  final bool isAdmin;
   final Batch year;
   final Department department;
   final Section section;
@@ -17,6 +18,7 @@ class UserModel {
     required this.uid,
     required this.email,
     required this.isAuthenticated,
+    required this.isAdmin,
     required this.year,
     required this.department,
     required this.section,
@@ -29,6 +31,7 @@ class UserModel {
     String? uid,
     String? email,
     bool? isAuthenticated,
+    bool? isAdmin,
     Batch? year,
     Department? department,
     Section? section,
@@ -40,6 +43,7 @@ class UserModel {
       uid: uid ?? this.uid,
       email: email ?? this.email,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
+      isAdmin: isAdmin ?? this.isAdmin,
       year: year ?? this.year,
       department: department ?? this.department,
       section: section ?? this.section,
@@ -54,6 +58,7 @@ class UserModel {
       'uid': uid,
       'email': email,
       'isAuthenticated': isAuthenticated,
+      'isAdmin': isAdmin,
       'year': year.toMap(),
       'department': department.name,
       'section': section.name,
@@ -68,6 +73,7 @@ class UserModel {
       uid: map['uid'] as String,
       email: map['email'] as String,
       isAuthenticated: map['isAuthenticated'] as bool,
+      isAdmin: map['isAdmin'] as bool,
       year: Batch.fromMap(map['year'] as Map<String, dynamic>),
       department: departmentFromString(map['department']) as Department,
       section: sectionFromString(map['section']) as Section,
@@ -82,7 +88,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(name: $name, profilePic: $profilePic, uid: $uid, email: $email, isAuthenticated: $isAuthenticated, year: $year, department: $department, section: $section, rollNO: $rollNO)';
+    return 'UserModel(name: $name, profilePic: $profilePic, uid: $uid, email: $email, isAuthenticated: $isAuthenticated, isAdmin: $isAdmin, year: $year, department: $department, section: $section, rollNO: $rollNO)';
   }
 
   @override
@@ -94,6 +100,7 @@ class UserModel {
         other.uid == uid &&
         other.email == email &&
         other.isAuthenticated == isAuthenticated &&
+        other.isAdmin == isAdmin &&
         other.year == year &&
         other.department == department &&
         other.section == section &&
@@ -107,6 +114,7 @@ class UserModel {
         uid.hashCode ^
         email.hashCode ^
         isAuthenticated.hashCode ^
+        isAdmin.hashCode ^
         year.hashCode ^
         department.hashCode ^
         section.hashCode ^

@@ -37,10 +37,10 @@ class AccountPageProfile extends ConsumerWidget {
           const SizedBox(
             height: 16,
           ),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: _OtherInfo(),
-          ),
+          // const Padding(
+          //   padding: EdgeInsets.all(8.0),
+          //   child: _OtherInfo(),
+          // ),
         ],
       ),
     );

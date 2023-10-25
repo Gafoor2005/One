@@ -54,6 +54,7 @@ class AuthRepository {
           profilePic: userCredential.user!.photoURL ?? 'assets/defaultUser.jpg',
           uid: userCredential.user!.uid,
           isAuthenticated: true,
+          isAdmin: false,
           year: Batch(fromYear: 2022),
           department: Department.cse,
           section: Section.c,

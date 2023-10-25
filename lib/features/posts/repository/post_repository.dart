@@ -43,4 +43,16 @@ class PostRepository {
               .toList(),
         );
   }
+
+  Future<void> deletePost(String id) async {
+    return await _posts.doc(id).delete();
+  }
+
+  Stream<Post> getPost(String id) {
+    return _posts
+        .doc(id)
+        .get()
+        .then((value) => Post.fromMap(value.data() as Map<String, dynamic>))
+        .asStream();
+  }
 }
