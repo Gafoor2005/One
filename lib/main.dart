@@ -1,17 +1,15 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:one/core/common/error_text.dart';
-import 'package:one/core/common/loader.dart';
-import 'package:one/core/models/user_model.dart';
+import 'package:one/core/models/ms_user_model.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
+import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:one/firebase_options.dart';
 import 'package:one/router.dart';
 import 'package:routemaster/routemaster.dart';
@@ -117,12 +115,14 @@ void showFlutterNotification(RemoteMessage message) {
   }
 }
 
+late bool loginStatus;
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
+  loginStatus = await aadOAuth.hasCachedAccountInformation;
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -139,7 +139,7 @@ Future<void> main() async {
     await setupFlutterNotifications();
   }
 
-  FirebaseMessaging.instance.subscribeToTopic("allAlerts");
+  // FirebaseMessaging.instance.subscribeToTopic("allAlerts");
 
   runApp(
     const ProviderScope(
@@ -166,47 +166,110 @@ class _MyAppState extends ConsumerState<MyApp> {
     //         )));
   }
 
-  UserModel? userModel;
+  MsUserModel? userModel;
 
-  void getData(WidgetRef ref, User data) async {
-    userModel = await ref
+  void getData(WidgetRef ref) async {
+    aadOAuth.getAccessToken().then((token) => ref
         .watch(authControllerProvider.notifier)
-        .getUserData(data.uid)
-        .first;
-    ref.read(userProvider.notifier).update((state) => userModel);
+        .getCurrentUserDataFromMs(token!)
+        .then((msUser) => ref
+            .watch(authControllerProvider.notifier)
+            .getMsUserData(msUser.id)
+            .first
+            .then((value) =>
+                ref.read(userProvider.notifier).update((state) => value))));
+
     setState(() {});
   }
+  // void getData(WidgetRef ref, User data) async {
+  //   userModel = await ref
+  //       .watch(authControllerProvider.notifier)
+  //       .getUserData(data.uid)
+  //       .first;
+  //   ref.read(userProvider.notifier).update((state) => userModel);
+  //   setState(() {});
+  // }
+
+  bool initDone = false;
 
   @override
   Widget build(BuildContext context) {
-    return ref.watch(authStateChangeProvider).when(
-          data: (data) => MaterialApp.router(
-            title: 'Flutter Demo',
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color.fromARGB(255, 49, 8, 130),
-              ),
-              // textTheme:
-              //     const TextTheme(bodyMedium: TextStyle(color: Colors.white70)),
-              useMaterial3: true,
-            ),
-            routerDelegate: RoutemasterDelegate(
-              routesBuilder: (context) {
-                if (data != null) {
-                  getData(ref, data);
-                  if (userModel != null) {
-                    return loggedInRoute;
-                  }
-                }
-                return loggedOutRoute;
-              },
-              navigatorKey: navkey,
-            ),
-            routeInformationParser: const RoutemasterParser(),
-          ),
-          error: (error, stackTrace) => ErrorText(error: error.toString()),
-          loading: () => const Loader(),
-        );
+    if (loginStatus && !initDone) {
+      initDone = true;
+      getData(ref);
+    }
+    RouteMap currentRouteMap = ref.watch(RouteProvider);
+    return MaterialApp.router(
+      title: 'One app',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 49, 8, 130),
+        ),
+        // textTheme:
+        //     const TextTheme(bodyMedium: TextStyle(color: Colors.white70)),
+        useMaterial3: true,
+      ),
+      routerDelegate: RoutemasterDelegate(
+        routesBuilder: (context) {
+          // if (data) {
+          //   getData(ref);
+          //   if (userModel != null) {
+          //     return loggedInRoute;
+          //   }
+          // }
+          // return loggedOutRoute;
+          return currentRouteMap;
+        },
+        navigatorKey: navkey,
+      ),
+      routeInformationParser: const RoutemasterParser(),
+    );
+    // return isLoading
+    //     ? const Loader()
+    //     : MaterialApp.router(
+    //         title: 'Flutter Demo',
+    //         theme: ThemeData(
+    //           colorScheme: ColorScheme.fromSeed(
+    //             seedColor: const Color.fromARGB(255, 49, 8, 130),
+    //           ),
+    //           // textTheme:
+    //           //     const TextTheme(bodyMedium: TextStyle(color: Colors.white70)),
+    //           useMaterial3: true,
+    //         ),
+    //         routerDelegate: RoutemasterDelegate(
+    //           routesBuilder: (context) => ref.watch(routeProvider),
+    //           navigatorKey: navkey,
+    //         ),
+    //         routeInformationParser: const RoutemasterParser(),
+    //       );
+
+    //   data: (data) => MaterialApp.router(
+    //     title: 'Flutter Demo',
+    //     theme: ThemeData(
+    //       colorScheme: ColorScheme.fromSeed(
+    //         seedColor: const Color.fromARGB(255, 49, 8, 130),
+    //       ),
+    //       // textTheme:
+    //       //     const TextTheme(bodyMedium: TextStyle(color: Colors.white70)),
+    //       useMaterial3: true,
+    //     ),
+    //     routerDelegate: RoutemasterDelegate(
+    //       routesBuilder: (context) {
+    //         if (data != null) {
+    //           getData(ref, data);
+    //           if (userModel != null) {
+    //             return loggedInRoute;
+    //           }
+    //         }
+    //         return loggedOutRoute;
+    //       },
+    //       navigatorKey: navkey,
+    //     ),
+    //     routeInformationParser: const RoutemasterParser(),
+    //   ),
+    //   error: (error, stackTrace) => ErrorText(error: error.toString()),
+    //   loading: () => const Loader(),
+    // );
   }
 }
 

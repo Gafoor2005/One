@@ -1,5 +1,8 @@
+import 'dart:developer';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:one/core/common/error_text.dart';
 import 'package:one/core/common/loader.dart';
@@ -26,6 +29,7 @@ class _PostDetailsState extends ConsumerState<PostDetails> {
           .watch(postControllerProvider.notifier)
           .getPost(widget.id)
           .first;
+      log(post.toString());
       setState(() {});
     }
   }
@@ -33,6 +37,7 @@ class _PostDetailsState extends ConsumerState<PostDetails> {
   @override
   Widget build(BuildContext context) {
     if (initDone == false) {
+      log('ooo');
       initDone = true;
       getPostData();
     }
@@ -61,9 +66,9 @@ class _PostDetailsState extends ConsumerState<PostDetails> {
                               child: SizedBox(
                                 height: 40,
                                 child: ref
-                                    .watch(getUserDataProvider(post!.uid))
+                                    .watch(getMsUserDataProvider(post!.uid))
                                     .when(
-                                      data: (data) => UserTile(user: data),
+                                      data: (data) => MsUserTile(user: data),
                                       error: (error, stackTrace) =>
                                           ErrorText(error: error.toString()),
                                       loading: () => const Loader(),
@@ -96,6 +101,69 @@ class _PostDetailsState extends ConsumerState<PostDetails> {
                       const SizedBox(
                         height: 10,
                       ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Wrap(
+                          spacing: 5,
+                          children: [
+                            Text(
+                              "Tags:",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            ...post!.tags!
+                                .map((e) => Text(
+                                      '@$e',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium!
+                                          .copyWith(),
+                                    ))
+                                .toList()
+                          ],
+                        ),
+                      ),
+                      (post!.attachment != null)
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18.0, vertical: 8),
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 60,
+                                child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        backgroundColor:
+                                            Theme.of(context).primaryColor),
+                                    onPressed: () async {
+                                      Uri uri = Uri.parse(post!.attachment!);
+                                      if (await canLaunchUrl(uri)) {
+                                        await launchUrl(uri);
+                                      } else {
+                                        // can't launch url
+                                      }
+                                    },
+                                    icon: FaIcon(
+                                      FontAwesomeIcons.download,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                    ),
+                                    label: Text(
+                                      'download  file',
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary),
+                                    )),
+                              ),
+                            )
+                          : const SizedBox(),
                     ],
                   ),
                 ),

@@ -1,2 +1,34 @@
 List of all iPhone taglines\n(2007-2023)\n\n• 1st iPhone: \"Apple reinvents the phone.\"\n• iPhone 3G: \"The iPhone you have been waiting for.\"\n• iPhone 3GS: \"The fastest, smartest phone yet.\"\n• iPhone 4: \"This changes everything. Again.\"\n• iPhone 4S: \"The most amazing iPhone yet\"
 Thank you everyone for being a part of this wonderful team\nWe are now 3 crore strong\nAt this milestone today i assure you, we will be back stronger than ever\nKnow this hum aapse bahut pyaar karte and aap hi ki wajah se yaha par hai\nYe aaj bhi sapna lagta hai\n3 C R O R E
+
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users/$entity",
+    "businessPhones": [
+        "8674273888"
+    ],
+    "displayName": "22481A05F2",
+    "givenName": "MOHAMMA",
+    "jobTitle": "Student",
+    "mail": "22481A05F2@gecgudlavallerumic.in",
+    "mobilePhone": "9533671939",
+    "officeLocation": "8674273737",
+    "preferredLanguage": null,
+    "surname": "ABDUL GAFOOR",
+    "userPrincipalName": "22481A05F2@gecgudlavallerumic.in",
+    "id": "d802f88d-4936-4f00-8501-a9e0c2d9f430"
+}
+
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users/$entity",
+    "businessPhones": [],
+    "displayName": "Dr G V S N R V Prasad",
+    "givenName": "Dr G V S N R V",
+    "jobTitle": null,
+    "mail": "gutta.prasad1@gecgudlavallerumic.in",
+    "mobilePhone": null,
+    "officeLocation": null,
+    "preferredLanguage": null,
+    "surname": "Prasad",
+    "userPrincipalName": "gutta.prasad1@gecgudlavallerumic.in",
+    "id": "bcec1684-a724-4c63-a622-3544f77151ac"
+}

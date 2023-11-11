@@ -163,7 +163,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:one/features/posts/screens/alerts_page.dart';
 import 'package:one/features/settings/screens/account_page.dart';
 import 'package:one/notif.dart';
@@ -188,20 +188,20 @@ class _HomePageState extends ConsumerState<HomePage> {
   String? initialMessage;
   // ignore: unused_field
   bool _resolved = false;
-
   @override
   void initState() {
     super.initState();
-
     FirebaseMessaging.instance.getInitialMessage().then(
           (message) => setState(
             () {
               if (message == null) return;
               _resolved = true;
               initialMessage = message.data.toString();
-              ref.read(messageArgumentsProvider.notifier).update((state) =>
-                  MessageArguments(message: message, openedApplication: true));
-              Routemaster.of(context).push('/notif');
+              // ref.read(messageArgumentsProvider.notifier).update((state) =>
+              //     MessageArguments(message: message, openedApplication: true));
+              // Routemaster.of(context).push('/notif');
+              final data = NotifPayload.fromMap(message.data);
+              Routemaster.of(context).push('post/${data.pid}');
             },
           ),
         );
@@ -220,13 +220,15 @@ class _HomePageState extends ConsumerState<HomePage> {
       //   arguments: MessageArguments(message, true),
       // );
       print("message : ${message.data}");
-      ref
-          .read(messageArgumentsProvider.notifier)
-          .update((state) => MessageArguments(
-                message: message,
-                openedApplication: true,
-              ));
-      Routemaster.of(context).push('/notif');
+      // ref
+      //     .read(messageArgumentsProvider.notifier)
+      //     .update((state) => MessageArguments(
+      //           message: message,
+      //           openedApplication: true,
+      //         ));
+      // Routemaster.of(context).push('/notif');
+      final data = NotifPayload.fromMap(message.data);
+      Routemaster.of(context).push('post/${data.pid}');
     });
   }
 
@@ -275,6 +277,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    aadOAuth.hasCachedAccountInformation.then((value) => log(value.toString()));
     return Scaffold(
       body: IndexedStack(
         index: currentIndex,
@@ -283,11 +286,29 @@ class _HomePageState extends ConsumerState<HomePage> {
           AccountPage(),
         ],
       ),
-      drawer: const Drawer(
+      drawer: Drawer(
         child: SafeArea(
           child: Column(
             children: [
-              MyDrawerTile(),
+              ListView(
+                children: [
+                  ListTile(
+                    title: Text('events'),
+                  ),
+                  ListTile(
+                    title: Text('clubs'),
+                  ),
+                  ListTile(
+                    title: Text('library'),
+                  ),
+                  ListTile(
+                    title: Text('feed back'),
+                  ),
+                  ListTile(
+                    title: Text('about'),
+                  ),
+                ],
+              )
             ],
           ),
         ),
@@ -354,32 +375,32 @@ class _HomePageState extends ConsumerState<HomePage> {
       );
 }
 
-class MyDrawerTile extends StatelessWidget {
-  const MyDrawerTile({
-    super.key,
-  });
+// class MyDrawerTile extends StatelessWidget {
+//   const MyDrawerTile({
+//     super.key,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        Routemaster.of(context).push('/notif');
-      },
-      child: const Row(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 5,
-            ),
-            child: FaIcon(
-              FontAwesomeIcons.bell,
-              size: 20,
-            ),
-          ),
-          Text('Notifications'),
-        ],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return TextButton(
+//       onPressed: () {
+//         Routemaster.of(context).push('/notif');
+//       },
+//       child: const Row(
+//         children: [
+//           Padding(
+//             padding: EdgeInsets.symmetric(
+//               horizontal: 20,
+//               vertical: 5,
+//             ),
+//             child: FaIcon(
+//               FontAwesomeIcons.bell,
+//               size: 20,
+//             ),
+//           ),
+//           Text('Notifications'),
+//         ],
+//       ),
+//     );
+//   }
+// }

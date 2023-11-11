@@ -5,19 +5,22 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:routemaster/routemaster.dart';
+
 import 'package:one/core/common/loader.dart';
 import 'package:one/core/models/user_model.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
-import 'package:routemaster/routemaster.dart';
 
 import 'core/common/user_tile.dart';
 
 class NotifPayload {
+  final String pid;
   final String name;
   final String uid;
   final String profilePic;
   final String email;
   NotifPayload({
+    required this.pid,
     required this.name,
     required this.uid,
     required this.profilePic,
@@ -25,12 +28,14 @@ class NotifPayload {
   });
 
   NotifPayload copyWith({
+    String? pid,
     String? name,
     String? uid,
     String? profilePic,
     String? email,
   }) {
     return NotifPayload(
+      pid: pid ?? this.pid,
       name: name ?? this.name,
       uid: uid ?? this.uid,
       profilePic: profilePic ?? this.profilePic,
@@ -40,6 +45,7 @@ class NotifPayload {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'pid': pid,
       'name': name,
       'uid': uid,
       'profilePic': profilePic,
@@ -49,6 +55,7 @@ class NotifPayload {
 
   factory NotifPayload.fromMap(Map<String, dynamic> map) {
     return NotifPayload(
+      pid: map['pid'] as String,
       name: map['name'] as String,
       uid: map['uid'] as String,
       profilePic: map['profilePic'] as String,
@@ -63,14 +70,15 @@ class NotifPayload {
 
   @override
   String toString() {
-    return 'NotifPayload(name: $name, uid: $uid, profilePic: $profilePic, email: $email)';
+    return 'NotifPayload(pid: $pid, name: $name, uid: $uid, profilePic: $profilePic, email: $email)';
   }
 
   @override
   bool operator ==(covariant NotifPayload other) {
     if (identical(this, other)) return true;
 
-    return other.name == name &&
+    return other.pid == pid &&
+        other.name == name &&
         other.uid == uid &&
         other.profilePic == profilePic &&
         other.email == email;
@@ -78,7 +86,11 @@ class NotifPayload {
 
   @override
   int get hashCode {
-    return name.hashCode ^ uid.hashCode ^ profilePic.hashCode ^ email.hashCode;
+    return pid.hashCode ^
+        name.hashCode ^
+        uid.hashCode ^
+        profilePic.hashCode ^
+        email.hashCode;
   }
 }
 

@@ -34,10 +34,12 @@ class PostController extends StateNotifier<bool> {
         _ref = ref,
         super(false);
 
-  void shareTextPost({
+  Future<String> shareTextPost({
     required BuildContext context,
     required String title,
     required String description,
+    List<String>? tags,
+    String? attachment,
   }) async {
     state = true;
     String postId = const Uuid().v1();
@@ -46,11 +48,12 @@ class PostController extends StateNotifier<bool> {
     final Post post = Post(
       id: postId,
       title: title,
-      username: user.name,
-      uid: user.uid,
+      username: user.displayName,
+      uid: user.id,
       createdAt: DateTime.now(),
       description: description,
-      // tags: ["everyone"],
+      tags: (tags == null) ? ["everyone"] : tags,
+      attachment: attachment,
     );
 
     final res = await _postRepository.addPost(post);
@@ -65,6 +68,7 @@ class PostController extends StateNotifier<bool> {
         Routemaster.of(context).pop();
       },
     );
+    return postId;
   }
 
   Stream<List<Post>> fetchUserPosts() {

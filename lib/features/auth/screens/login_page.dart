@@ -1,14 +1,18 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/core/common/loader.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
+import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:one/features/auth/widgets/sign_in_button.dart';
 
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
 
-  void signInWithGoogle(BuildContext context, WidgetRef ref) {
-    ref.read(authControllerProvider.notifier).signInWithGoogle(context);
+  void signInWithMicrosoft(BuildContext context, WidgetRef ref) {
+    ref.read(authControllerProvider.notifier).signInWithMicrosoft(context);
+
     // ref.read(authControllerProvider).signInWithGoogle(context);
     // Navigator.of(context)
     //     .push(MaterialPageRoute(builder: (context) => const HomePage()));
@@ -28,6 +32,7 @@ class LoginPage extends ConsumerWidget {
     // late final User? loginStatus;
     // ref.watch(authStateChangeProvider).whenData((value) => loginStatus = value);
 
+    aadOAuth.hasCachedAccountInformation.then((value) => log(value.toString()));
     return Builder(builder: (context) {
       return Scaffold(
         backgroundColor: Colors.white,
@@ -45,8 +50,9 @@ class LoginPage extends ConsumerWidget {
                     ),
                     const Spacer(),
                     SignInButton(onTap: () {
-                      signInWithGoogle(context, ref);
+                      signInWithMicrosoft(context, ref);
                     }),
+
                     // const LogOutButton(),
                     // Text(
                     //   loginStatus == null

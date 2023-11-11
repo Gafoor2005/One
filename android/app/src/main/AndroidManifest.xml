@@ -38,4 +38,16 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="high_importance_channel" />
     </application>
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Provide required visibility configuration for API level 30 and above -->
+<queries>
+  
+  <!-- If your application checks for inAppBrowserView launch mode support -->
+  <intent>
+    <action android:name="android.support.customtabs.action.CustomTabsService" />
+  </intent>
+</queries>
 </manifest>
+

@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:one/core/models/user_model.dart';
+import 'package:multi_dropdown/multiselect_dropdown.dart';
+import 'package:one/core/models/ms_user_model.dart';
 import 'package:one/core/utils.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/posts/controller/post_controller.dart';
@@ -28,11 +31,14 @@ extension StringExtensions on String {
 class _CreatePostPageState extends ConsumerState<CreatePostPage> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
+  late MultiSelectController multiSelectController;
+  List<String> tags = ['everyone'];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    multiSelectController = MultiSelectController();
   }
 
   @override
@@ -99,22 +105,39 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
   ///
   /// you only need a `server key for authentication` as ``key=<serverkey>``
   /// this server key can be found on firebase console under cloud messaging section.
-  Future<void> sendMessageToTopic(String title, String body) async {
+  Future<void> sendMessageToTopic(String title, String body, String pId) async {
     // Create a new FCM client.
-    final UserModel user = ref.watch(userProvider)!;
-
+    final MsUserModel user = ref.watch(userProvider)!;
+    if (tags.isEmpty) return;
+    String condition = "";
+    if (tags.length == 1) {
+      condition = '\'${tags[0]}\' in topics';
+    } else {
+      for (int i = 0; i < tags.length; i++) {
+        if (i == tags.length - 1) {
+          condition += '\'${tags[i]}\' in topics';
+          continue;
+        }
+        condition += '\'${tags[i]}\' in topics || ';
+      }
+    }
+    log(condition);
     final data = {
-      'to': '/topics/allAlerts',
+      // 'condition': '\'CSE\' in topics || \'allAlerts\' in topics',
+      // 'to': '/topics/allAlerts',
+      'condition': condition,
       'notification': {
         'title': title,
         'body': body,
       },
       'data': NotifPayload(
-              uid: user.uid,
-              profilePic: user.profilePic,
-              email: user.email,
-              name: user.name)
-          .toMap(),
+        pid: pId,
+        uid: user.id,
+        profilePic:
+            'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
+        email: user.mail ?? 'not found',
+        name: user.displayName,
+      ).toMap(),
     };
 
     String url = dotenv.env['FCM_LEGACY_API_POST_URI']!;
@@ -137,18 +160,15 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
     }
   }
 
-  void addPost() {
+  void addPost() async {
     if ((titleController.text != '') && (descriptionController.text != '')) {
       String title = titleController.text.trim().capitalize();
       String description = descriptionController.text.trim().capitalize();
       // sendPushMessage(
       //     titleController.text.trim(), descriptionController.text.trim());
-      sendMessageToTopic(title, description);
-      ref.read(postControllerProvider.notifier).shareTextPost(
-            context: context,
-            title: title,
-            description: description,
-          );
+      final pid = await ref.read(postControllerProvider.notifier).shareTextPost(
+          context: context, title: title, description: description, tags: tags);
+      sendMessageToTopic(title, description, pid);
     } else {
       showSnackBar(context, "fill the fields");
     }
@@ -215,36 +235,111 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                             ),
                           ),
                         )
-                      : SizedBox(
-                          height: (constraints.maxHeight),
-                          child: TextField(
-                            autofocus: inputIndex == 1 ? true : false,
-                            controller: descriptionController,
-                            // scrollPadding: EdgeInsets.all(30),
-                            style:
-                                Theme.of(context).textTheme.bodyLarge!.copyWith(
+                      : inputIndex == 1
+                          ? SizedBox(
+                              height: (constraints.maxHeight),
+                              child: TextField(
+                                autofocus: inputIndex == 1 ? true : false,
+                                controller: descriptionController,
+                                // scrollPadding: EdgeInsets.all(30),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .copyWith(
                                       color: Colors.white,
                                     ),
-                            maxLines: 50,
-                            cursorColor: Colors.white,
-                            decoration: InputDecoration(
-                              hintText: "enter sub title here",
-                              hintStyle: const TextStyle(color: Colors.white30),
-                              fillColor: const Color.fromRGBO(103, 65, 217, 1),
-                              focusColor: Colors.white,
-                              filled: true,
-                              focusedBorder: myInputBorder,
-                              enabledBorder: myInputBorder.copyWith(),
-                              border: myInputBorder.copyWith(),
-                              contentPadding: const EdgeInsets.only(
-                                right: 20,
-                                left: 20,
-                                top: 20,
-                                bottom: 0,
+                                maxLines: 50,
+                                cursorColor: Colors.white,
+                                decoration: InputDecoration(
+                                  hintText: "enter sub title here",
+                                  hintStyle:
+                                      const TextStyle(color: Colors.white30),
+                                  fillColor:
+                                      const Color.fromRGBO(103, 65, 217, 1),
+                                  focusColor: Colors.white,
+                                  filled: true,
+                                  focusedBorder: myInputBorder,
+                                  enabledBorder: myInputBorder.copyWith(),
+                                  border: myInputBorder.copyWith(),
+                                  contentPadding: const EdgeInsets.only(
+                                    right: 20,
+                                    left: 20,
+                                    top: 20,
+                                    bottom: 0,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        )
+                            )
+                          : Column(
+                              children: [
+                                const Row(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        'Tags',
+                                        style: TextStyle(fontSize: 24),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  width: constraints.maxWidth - 40,
+                                  child: MultiSelectDropDown(
+                                    showClearIcon: true,
+                                    controller: multiSelectController,
+                                    onOptionSelected: (options) {
+                                      List<String> res = [];
+                                      for (ValueItem e in options) {
+                                        res.add(e.value!);
+                                      }
+                                      tags = res;
+                                      debugPrint(tags.toString());
+                                    },
+                                    options: const <ValueItem>[
+                                      ValueItem(
+                                          label: '@everyone',
+                                          value: 'everyone'),
+                                      ValueItem(
+                                          label: '@Students', value: 'Student'),
+                                      ValueItem(label: '@CE', value: 'CE'),
+                                      ValueItem(label: '@EEE', value: 'EEE'),
+                                      ValueItem(label: '@ME', value: 'ME'),
+                                      ValueItem(label: '@ECE', value: 'ECE'),
+                                      ValueItem(label: '@CSE', value: 'CSE'),
+                                      ValueItem(label: '@IT', value: 'IT'),
+                                      ValueItem(label: '@AIML', value: 'AIML'),
+                                      ValueItem(label: '@AIDS', value: 'AIDS'),
+                                      ValueItem(label: '@IOT', value: 'IOT'),
+                                      ValueItem(
+                                          label: '@20Batch', value: '20Batch'),
+                                      ValueItem(
+                                          label: '@21Batch', value: '21Batch'),
+                                      ValueItem(
+                                          label: '@22Batch', value: '22Batch'),
+                                      ValueItem(
+                                          label: '@23Batch', value: '23Batch'),
+                                    ],
+                                    // maxItems: 2,
+                                    // disabledOptions: const [
+                                    // ValueItem(label: 'Option 1', value: '1')
+                                    // ],
+                                    selectedOptions: const [
+                                      ValueItem(
+                                          label: '@everyone', value: 'everyone')
+                                    ],
+                                    selectionType: SelectionType.multi,
+                                    chipConfig: const ChipConfig(
+                                        wrapType: WrapType.wrap),
+                                    dropdownHeight: 400,
+                                    optionTextStyle:
+                                        const TextStyle(fontSize: 16),
+                                    selectedOptionIcon:
+                                        const Icon(Icons.check_circle),
+                                  ),
+                                ),
+                              ],
+                            )
                 ],
               ),
             );
@@ -254,7 +349,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          inputIndex != 0
+          inputIndex == 1
               ? ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -276,11 +371,12 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              if (inputIndex < 1) {
+              if (inputIndex < 2) {
                 setState(() {
                   inputIndex++;
                 });
               } else {
+                // SystemChannels.textInput.invokeMethod('TextInput.hide');
                 addPost();
               }
             },

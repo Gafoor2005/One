@@ -16,6 +16,7 @@ class AlertsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final roles = ref.watch(userProvider)!.roles;
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 161, 141, 219),
       // backgroundColor: Colors.transparent,
@@ -38,29 +39,44 @@ class AlertsPage extends ConsumerWidget {
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 30, vertical: 5),
                                   child: Text(
-                                    "Alerts",
+                                    "Announcements",
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.w600,
-                                      fontSize: 25,
+                                      fontSize: 20,
                                     ),
                                   ),
                                 ),
-                                CustomCard(post: post),
+                                (Set.from(roles as List<String>)
+                                        .intersection(
+                                            Set.from(post.tags as List<String>))
+                                        .isNotEmpty)
+                                    ? CustomCard(post: post)
+                                    : const SizedBox(),
                               ],
                             );
                           }
                           if (index == data.length - 1) {
                             return Column(
                               children: [
-                                CustomCard(post: post),
+                                (Set.from(roles as List<String>)
+                                        .intersection(
+                                            Set.from(post.tags as List<String>))
+                                        .isNotEmpty)
+                                    ? CustomCard(post: post)
+                                    : const SizedBox(),
                                 const SizedBox(
                                   height: 100,
                                 ),
                               ],
                             );
                           }
-                          return CustomCard(post: post);
+                          return (Set.from(roles as List<String>)
+                                  .intersection(
+                                      Set.from(post.tags as List<String>))
+                                  .isNotEmpty)
+                              ? CustomCard(post: post)
+                              : const SizedBox();
                         },
                       ),
                     );
@@ -75,42 +91,68 @@ class AlertsPage extends ConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: ref.watch(userProvider)!.isAdmin
-          ? IconButton(
-              color: Theme.of(context).primaryColor,
-              style: IconButton.styleFrom(
-                elevation: 5,
-                backgroundColor: Colors.white,
-                shadowColor: Colors.black,
-                fixedSize: const Size.square(55),
-                padding: const EdgeInsets.all(0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-              ),
-              onPressed: () {
-                Routemaster.of(context).push('/create-post');
-              },
-              icon: const FaIcon(FontAwesomeIcons.penToSquare),
-            )
-          // ? ElevatedButton(
-          //     onPressed: () {
-          //       Routemaster.of(context).push('/create-post');
-          //     },
-          //     style: ElevatedButton.styleFrom(
-          //       elevation: 5,
-          //       shadowColor: Colors.black,
-          //       fixedSize: const Size.square(65),
-          //       padding: const EdgeInsets.all(0),
-          //       shape: RoundedRectangleBorder(
-          //         borderRadius: BorderRadius.circular(50),
-          //       ),
-          //     ),
-          //     child: const Center(
-          //       child: FaIcon(FontAwesomeIcons.plus),
-          //     ),
-          //   )
-          : null,
+      floatingActionButton:
+          (ref.watch(userProvider)?.roles ?? []).contains('admin')
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      color: Theme.of(context).primaryColor,
+                      style: IconButton.styleFrom(
+                        elevation: 5,
+                        backgroundColor: Colors.white,
+                        shadowColor: Colors.black,
+                        fixedSize: const Size.square(55),
+                        padding: const EdgeInsets.all(0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                      ),
+                      onPressed: () {
+                        Routemaster.of(context).push('/upload-file');
+                      },
+                      icon: const FaIcon(FontAwesomeIcons.file),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    IconButton(
+                      color: Theme.of(context).primaryColor,
+                      style: IconButton.styleFrom(
+                        elevation: 5,
+                        backgroundColor: Colors.white,
+                        shadowColor: Colors.black,
+                        fixedSize: const Size.square(55),
+                        padding: const EdgeInsets.all(0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                      ),
+                      onPressed: () {
+                        Routemaster.of(context).push('/create-post');
+                      },
+                      icon: const FaIcon(FontAwesomeIcons.penToSquare),
+                    ),
+                  ],
+                )
+              // ? ElevatedButton(
+              //     onPressed: () {
+              //       Routemaster.of(context).push('/create-post');
+              //     },
+              //     style: ElevatedButton.styleFrom(
+              //       elevation: 5,
+              //       shadowColor: Colors.black,
+              //       fixedSize: const Size.square(65),
+              //       padding: const EdgeInsets.all(0),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(50),
+              //       ),
+              //     ),
+              //     child: const Center(
+              //       child: FaIcon(FontAwesomeIcons.plus),
+              //     ),
+              //   )
+              : null,
     );
   }
 }
@@ -146,7 +188,7 @@ class _CustomCardState extends ConsumerState<CustomCard> {
   Widget build(BuildContext context) {
     final n = calculateDifference(widget.post.createdAt);
     return GestureDetector(
-      onLongPressStart: ref.watch(userProvider)!.isAdmin
+      onLongPressStart: (ref.watch(userProvider)?.roles ?? []).contains('admin')
           ? (value) {
               if (currentIndex != 1) {
                 HapticFeedback.vibrate();

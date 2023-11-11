@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SignInButton extends ConsumerWidget {
   // final bool isFromLogin;
@@ -21,19 +22,23 @@ class SignInButton extends ConsumerWidget {
       child: Builder(builder: (context) {
         return ElevatedButton.icon(
           onPressed: signIn,
-          icon: Image.asset(
-            'assets/google.png',
+          // icon: Image.asset(
+          //   'assets/google.png',
+          //   width: 35,
+          // ),
+          icon: SvgPicture.asset(
+            'assets/microsoft.svg',
             width: 35,
           ),
           label: const Text(
-            'Continue with Google',
+            'Login with Microsoft',
             style: TextStyle(fontSize: 18, color: Colors.white),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+            backgroundColor: Theme.of(context).colorScheme.onBackground,
             minimumSize: const Size(double.infinity, 50),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50),
+              borderRadius: BorderRadius.circular(18),
             ),
             elevation: 5,
           ),

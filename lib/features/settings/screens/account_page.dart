@@ -12,10 +12,45 @@ class AccountPage extends StatelessWidget {
         title: const Text("Account"),
         centerTitle: true,
       ),
-      body: const Column(
+      body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          AccountPageProfile(),
+          Column(
+            children: [
+              AccountPageProfile(),
+              // Container(
+              //   margin: EdgeInsets.symmetric(horizontal: 20),
+              //   decoration: BoxDecoration(
+              //     color: Colors.black,
+              //     borderRadius: BorderRadius.circular(20),
+              //   ),
+              //   child: Column(
+              //     children: [
+              //       ListTile(
+              //         leading: FaIcon(
+              //           FontAwesomeIcons.gear,
+              //           color: Colors.white,
+              //         ),
+              //         title: Text(
+              //           'general',
+              //           style: TextStyle(color: Colors.white),
+              //         ),
+              //       ),
+              //       ListTile(
+              //         leading: FaIcon(
+              //           FontAwesomeIcons.gear,
+              //           color: Colors.white,
+              //         ),
+              //         title: Text(
+              //           'accout settings',
+              //           style: TextStyle(color: Colors.white),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // )
+            ],
+          ),
           LogOutButton(),
         ],
       ),
