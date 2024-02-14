@@ -1,36 +1,33 @@
 import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/core/common/loader.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/auth/repository/auth_repository.dart';
-import 'package:one/features/auth/widgets/sign_in_button.dart';
+import 'package:one/features/auth/widgets/large_button.dart';
 
+final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
+  return FirebaseAuth.instance;
+});
+
+// FirebaseAuth firebaseAuth =
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
 
-  void signInWithMicrosoft(BuildContext context, WidgetRef ref) {
-    ref.read(authControllerProvider.notifier).signInWithMicrosoft(context);
+  /// ### this handles signin and navigation to hame page if success
+  void signInWithMicrosoft(BuildContext context, WidgetRef ref) async {
+    // ref.read(authControllerProvider.notifier).signInWithMicrosoft(context);
 
-    // ref.read(authControllerProvider).signInWithGoogle(context);
-    // Navigator.of(context)
-    //     .push(MaterialPageRoute(builder: (context) => const HomePage()));
+    // firebaseAuth.tenantId = "df7217c9-cec8-4cc2-8e6a-a1cfbfadb321";
+
+    ref.read(authControllerProvider.notifier).signInWithMS(context);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ref.watch(authProvider).authStateChanges().listen((User? user) {
-    //   if (user == null) {
-    //     print('User is currently signed out!');
-    //   } else {
-    //     print('User is signed in!');
-    //   }
-    // });
-
     final isLoading = ref.watch(authControllerProvider);
-    // late final User? loginStatus;
-    // ref.watch(authStateChangeProvider).whenData((value) => loginStatus = value);
 
     aadOAuth.hasCachedAccountInformation.then((value) => log(value.toString()));
     return Builder(builder: (context) {
@@ -44,23 +41,63 @@ class LoginPage extends ConsumerWidget {
                     const Spacer(
                       flex: 2,
                     ),
-                    const CircleAvatar(
-                      backgroundImage: AssetImage("assets/logo.jpg"),
-                      radius: 100,
+                    SizedBox(
+                      width: 200,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const CircleAvatar(
+                            backgroundImage: AssetImage("assets/logo.jpg"),
+                            radius: 30,
+                          ),
+                          const ColoredBox(
+                            color: Colors.black,
+                            child: SizedBox(
+                              height: 40,
+                              width: 2,
+                            ),
+                          ),
+                          Image.asset(
+                            "assets/devloopers.png",
+                            height: 40,
+                          ),
+                        ],
+                      ),
                     ),
                     const Spacer(),
-                    SignInButton(onTap: () {
-                      signInWithMicrosoft(context, ref);
-                    }),
-
-                    // const LogOutButton(),
-                    // Text(
-                    //   loginStatus == null
-                    //       ? "Loged Out"
-                    //       : "logged in as ${loginStatus!.email}",
-                    // ),
+                    const CircleAvatar(
+                      radius: 75,
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      child: Text(
+                        "1",
+                        style: TextStyle(
+                          fontFamily: "BlackHanSans",
+                          fontSize: 100,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Text(
+                      "One App",
+                      style: TextStyle(
+                        fontFamily: "BlackHanSans",
+                        fontSize: 24,
+                      ),
+                    ),
                     const Spacer(
                       flex: 2,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: LargeButton(
+                        text: "Sign in",
+                        onTap: () {
+                          signInWithMicrosoft(context, ref);
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -69,8 +106,6 @@ class LoginPage extends ConsumerWidget {
     });
   }
 }
-
-
 
 // listening stream provider
 // ref.watch(authStateChangeProvider).when(

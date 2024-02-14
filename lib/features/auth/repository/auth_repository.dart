@@ -16,6 +16,7 @@ import 'package:one/core/models/ms_user_model.dart';
 import 'package:one/core/models/user_model.dart';
 import 'package:one/core/providers/firebase_providers.dart';
 import 'package:one/core/type_defs.dart';
+import 'package:one/core/utils.dart';
 import 'package:one/main.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -23,7 +24,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 final Config _config = Config(
   tenant: dotenv.env['TENANT']!,
   clientId: dotenv.env['CLIENT_ID']!,
-  scope: "User.ReadBasic.All User.Read openid profile offline_access",
+  scope:
+      "User.ReadBasic.All User.Read openid profile offline_access Files.Read.All",
   // redirectUri is Optional as a default is calculated based on app type/web location
   redirectUri: "https://login.live.com/oauth20_desktop.srf",
   navigatorKey: navkey,
@@ -58,10 +60,87 @@ class AuthRepository {
         _firestore = firestore,
         _googleSignIn = googleSignIn,
         _aadOAuth = aadOAuth;
+  UserCredential? _userCredential;
 
   Stream<User?> get authStateChange => _auth.authStateChanges();
 
   CollectionReference get _users => _firestore.collection('users');
+
+  FutureEither<UserModel> signInWithMS() async {
+    try {
+      MicrosoftAuthProvider msAuthProvider = MicrosoftAuthProvider();
+      msAuthProvider.addScope("offline_access");
+      msAuthProvider.addScope("User.Read");
+      msAuthProvider.addScope("User.ReadBasic.All");
+      msAuthProvider.addScope("profile");
+
+      msAuthProvider.setCustomParameters({
+        "prompt": "consent",
+        "tenant": "organizations",
+        // "login_hint": "22481A05F2@gecgudlavallerumic.in"
+        // "login_hint": "gafoor.110705@outlook.com"
+        // "domain_hint": "gecgudlavallerumic.in"
+      });
+      _userCredential = await _auth.signInWithProvider(msAuthProvider);
+      // getCurrentUserDataFromMs(userCredential.credential!.accessToken ?? '');
+      UserModel userModel;
+      // log(_userCredential!.credential!.accessToken.toString());
+      log(_userCredential!.toString());
+      if (_userCredential!.additionalUserInfo!.isNewUser) {
+        String photoUrl =
+            'https://firebasestorage.googleapis.com/v0/b/oneapp-af948.appspot.com/o/default%2FuserIconDark.png?alt=media&token=d11fde5e-ba19-4a48-9eb2-051317776d21';
+
+        final response = await http.get(
+          Uri.parse('https://graph.microsoft.com/v1.0/me/photo/\$value'),
+          headers: {
+            'Authorization':
+                'Bearer ${_userCredential!.credential!.accessToken}',
+            'Content-Type': 'application/json',
+          },
+        );
+        if (response.statusCode == 200) {
+          final file = await createTempFileFromPostRequestBody(response);
+          log(file.path);
+          final storageRef = FirebaseStorage.instance
+              .ref()
+              .child('profilePictures/${_userCredential!.user!.uid}');
+
+          try {
+            //Store the file
+            await storageRef.putFile(File(file.path));
+            //Success: get the download URL
+            photoUrl = await storageRef.getDownloadURL();
+          } catch (error) {
+            log(error.toString());
+          }
+        }
+        userModel = UserModel(
+          name: _userCredential!.user!.displayName ?? "no name",
+          email: _userCredential!.user!.email ?? "notfound@email.com",
+          profilePic: photoUrl,
+          uid: _userCredential!.user!.uid,
+          isAuthenticated: true,
+          year: Batch(fromYear: 2022),
+          department: Department.cse,
+          section: Section.c,
+          rollNO: "22481A05F2",
+        );
+        // print(userCredential.user!.email.toString());
+        await _users.doc(_userCredential!.user!.uid).set(userModel.toMap());
+      } else {
+        userModel = await getUserData(_userCredential!.user!.uid).first;
+      }
+
+      // log(_auth.authStateChanges().first.toString());
+      return right(userModel);
+    } on FirebaseException catch (e) {
+      log(e.message.toString());
+      return left(Failure(e.message.toString()));
+    } catch (e) {
+      log(e.toString());
+      return left(Failure(e.toString()));
+    }
+  }
 
   FutureEither<UserModel> signInWithGoogle() async {
     try {
@@ -77,7 +156,7 @@ class AuthRepository {
           await _auth.signInWithCredential(credential);
 
       UserModel userModel;
-      // print(userCredential.additionalUserInfo!.isNewUser);
+      // log(userCredential.additionalUserInfo.toString());
       if (userCredential.additionalUserInfo!.isNewUser) {
         userModel = UserModel(
           name: userCredential.user!.displayName ?? "no name",
@@ -110,7 +189,7 @@ class AuthRepository {
         'Authorization': 'Bearer $accessToken',
       },
     );
-
+    log(response.body);
     // Decode the JSON response.
     final user = MsUserModel.fromJson(response.body);
     return user;
@@ -121,9 +200,10 @@ class AuthRepository {
     String accessToken,
   ) async {
     final snap = await _users.doc(userModel.id).get();
+    log('snap ' + snap.toString());
     if (!snap.exists) {
       String photoUrl =
-          'https://firebasestorage.googleapis.com/v0/b/oneapp-af948.appspot.com/o/default%2Fdefaultimages.png?alt=media&token=b406faf9-6450-4055-99d3-6e7e3584e927&_gl=1*1xorfwr*_ga*NDEwNTg1MjYzLjE2ODU0NjIyNDc.*_ga_CW55HF8NVT*MTY5ODY4NDc5MS42Ny4xLjE2OTg2ODQ4NjEuNjAuMC4w';
+          'https://firebasestorage.googleapis.com/v0/b/oneapp-af948.appspot.com/o/default%2FuserIconDark.png?alt=media&token=d11fde5e-ba19-4a48-9eb2-051317776d21';
       final response = await http.get(
         Uri.parse('https://graph.microsoft.com/v1.0/me/photo/\$value'),
         headers: {
@@ -151,8 +231,8 @@ class AuthRepository {
       List<String>? roles = ['everyone'];
       if (userModel.jobTitle != null && userModel.jobTitle == "Student") {
         roles.add(userModel.jobTitle!);
-        String branchCode = userModel.displayName.substring(6, 8);
-        String batch = '${userModel.displayName.substring(0, 2)}Batch';
+        String branchCode = userModel.userPrincipalName.substring(6, 8);
+        String batch = '${userModel.userPrincipalName.substring(0, 2)}Batch';
         Map<String, String> branchs = {
           "01": "CE",
           "02": "EEE",
@@ -170,11 +250,17 @@ class AuthRepository {
         roles.add(batch);
       }
       log(userModel.displayName.substring(6, 8));
-      await _users
-          .doc(userModel.id)
-          .set(userModel.copyWith(photo: photoUrl, roles: roles).toMap());
+      await _users.doc(userModel.id).set(userModel
+          .copyWith(displayName: '', photo: photoUrl, roles: roles)
+          .toMap());
     }
     return getMsUserData(userModel.id);
+  }
+
+  void setDisplayName(MsUserModel userModel, String name) async {
+    await _users
+        .doc(userModel.id)
+        .set(userModel.copyWith(displayName: name).toMap());
   }
 
   Future<File> createTempFileFromPostRequestBody(request) async {

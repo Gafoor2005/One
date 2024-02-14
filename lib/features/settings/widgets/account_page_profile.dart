@@ -1,86 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:one/core/models/ms_user_model.dart';
 import 'package:one/core/models/user_model.dart';
 import 'package:one/core/utils.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
+import 'package:one/features/auth/repository/auth_repository.dart';
 
 class AccountPageProfile extends ConsumerWidget {
   const AccountPageProfile({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final MsUserModel userModel = ref.watch(userProvider) ??
-        MsUserModel(
-            id: 'id',
-            userPrincipalName: 'userPrincipalName',
-            displayName: 'displayName',
-            givenName: 'givenName',
-            surname: 'surname');
-
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.black,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            backgroundImage: NetworkImage(userModel.photo ??
-                "https://firebasestorage.googleapis.com/v0/b/oneapp-af948.appspot.com/o/default%2Fdefaultimages.png?alt=media&token=b406faf9-6450-4055-99d3-6e7e3584e927&_gl=1*1xorfwr*_ga*NDEwNTg1MjYzLjE2ODU0NjIyNDc.*_ga_CW55HF8NVT*MTY5ODY4NDc5MS42Ny4xLjE2OTg2ODQ4NjEuNjAuMC4w"),
-            onBackgroundImageError: (exception, stackTrace) =>
-                showSnackBar(context, exception.toString()),
-            radius: 50,
-          ),
-          const SizedBox(
-            height: 8,
-          ),
-          Text(
-            userModel.displayName,
-            style: const TextStyle(color: Colors.white70),
-          ),
-          const SizedBox(
-            height: 4,
-          ),
-          Text(
-            '${userModel.givenName} ${userModel.surname}',
-            style: const TextStyle(color: Colors.white70),
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          (userModel.roles != null)
-              ? Wrap(
-                  direction: Axis.horizontal,
-                  alignment: WrapAlignment.center,
-                  spacing: 5,
-                  runSpacing: 10,
-                  children: [
-                    for (String e in userModel.roles!)
-                      (e != 'everyone')
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 12),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: Colors.white,
-                              ),
-                              child: Text(
-                                e,
-                                style: Theme.of(context).textTheme.labelMedium,
-                              ),
-                            )
-                          : const SizedBox(),
-                  ],
-                )
-              : const SizedBox(),
-        ],
-      ),
-    );
+    final UserModel? userModel = ref.watch(userProvider);
+    return userModel != null
+        ? Container(
+            width: double.infinity,
+            margin: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.blue.shade50,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  backgroundImage: NetworkImage(userModel.profilePic),
+                  onBackgroundImageError: (exception, stackTrace) =>
+                      showSnackBar(context, exception.toString()),
+                  radius: 50,
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  userModel.name,
+                ),
+                const SizedBox(
+                  height: 4,
+                ),
+                Text(
+                  '${userModel.rollNO}',
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                (userModel.roles != null)
+                    ? Wrap(
+                        direction: Axis.horizontal,
+                        alignment: WrapAlignment.center,
+                        spacing: 5,
+                        runSpacing: 10,
+                        children: [
+                          for (String e in userModel.roles!)
+                            (e != 'everyone')
+                                ? Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 4, horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.white,
+                                    ),
+                                    child: Text(
+                                      e,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                  )
+                                : const SizedBox(),
+                        ],
+                      )
+                    : const SizedBox(),
+              ],
+            ),
+          )
+        : const Center(
+            child: Text("Login to account"),
+          );
   }
 }
 

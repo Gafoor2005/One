@@ -10,9 +10,8 @@ import 'package:one/core/utils.dart';
 import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/main.dart';
-import 'package:one/router.dart';
 
-final userProvider = StateProvider<MsUserModel?>((ref) => null);
+final userProvider = StateProvider<UserModel?>((ref) => null);
 
 final authControllerProvider = StateNotifierProvider<AuthController, bool>(
   (ref) => AuthController(
@@ -23,7 +22,8 @@ final authControllerProvider = StateNotifierProvider<AuthController, bool>(
 );
 
 final authStateChangeProvider = StreamProvider((ref) {
-  return ref.watch(userProvider.notifier).stream;
+  final authController = ref.watch(authControllerProvider.notifier);
+  return authController.authStateChange;
 });
 
 final getUserDataProvider = StreamProvider.family((ref, String uid) {
@@ -37,7 +37,6 @@ final getMsUserDataProvider = StreamProvider.family((ref, String uid) {
 
 class AuthController extends StateNotifier<bool> {
   final AuthRepository _authRepository;
-  final AadOAuth _aadOAuth;
   final Ref _ref;
   AuthController({
     required AuthRepository authRepository,
@@ -45,41 +44,37 @@ class AuthController extends StateNotifier<bool> {
     required AadOAuth aadOAuth,
   })  : _authRepository = authRepository,
         _ref = ref,
-        _aadOAuth = aadOAuth,
         super(false); // loading
 
   Stream<User?> get authStateChange => _authRepository.authStateChange;
 
-  void signInWithMicrosoft(BuildContext context) async {
-    state = true;
-    final user = await _aadOAuth.login();
-    // state = false;
-    user.fold(
+  void signInWithMS(BuildContext context) async {
+    state = true; // started loader
+    final result = await _authRepository.signInWithMS();
+    result.fold(
       (l) {
-        print(l.message);
+        log(l.message);
         showSnackBar(context, l.message);
+        state = false;
       },
-      (token) async {
+      (user) async {
         log('sign in');
-        final userModel = await _authRepository
-            .getCurrentUserDataFromMs(token.accessToken.toString());
-        log(token.accessToken.toString());
-        await _authRepository.signIn(userModel, token.accessToken!);
-        final MsUserModel user =
-            await _authRepository.getMsUserData(userModel.id).first;
         _ref.read(userProvider.notifier).update((state) => user);
-        _ref.read(RouteProvider.notifier).setRoute(loggedInRoute);
-        print(user);
+        log('hoooho');
+        log(user.toString());
         if (user.roles != null) {
           for (String topic in user.roles!) {
             FirebaseMessaging.instance.subscribeToTopic(topic);
           }
         }
-
         loginStatus = true;
+        state = false; // stopped loader
       },
     );
-    state = false;
+  }
+
+  void setDisplayName(MsUserModel userModel, String name) {
+    _authRepository.setDisplayName(userModel, name);
   }
 
   Future<MsUserModel> getCurrentUserDataFromMs(String accessToken) async {

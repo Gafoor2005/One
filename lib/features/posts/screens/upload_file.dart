@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:one/core/models/ms_user_model.dart';
+import 'package:one/core/models/user_model.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/posts/controller/post_controller.dart';
 import 'package:one/notif.dart';
@@ -19,7 +19,7 @@ class UploadFile extends ConsumerWidget {
   Future<void> sendMessageToTopic(String title, String body, String pId,
       WidgetRef ref, List<String> tags) async {
     // Create a new FCM client.
-    final MsUserModel user = ref.watch(userProvider)!;
+    final UserModel user = ref.watch(userProvider)!;
     if (tags.isEmpty) return;
     String condition = "";
     if (tags.length == 1) {
@@ -44,11 +44,11 @@ class UploadFile extends ConsumerWidget {
       },
       'data': NotifPayload(
         pid: pId,
-        uid: user.id,
+        uid: user.uid,
         profilePic:
             'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
-        email: user.mail ?? 'not found',
-        name: user.displayName,
+        email: user.email,
+        name: user.name,
       ).toMap(),
     };
 

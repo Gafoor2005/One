@@ -54,6 +54,7 @@ class AccountPage extends StatelessWidget {
           LogOutButton(),
         ],
       ),
+      bottomNavigationBar: BottomAppBar(),
     );
   }
 }

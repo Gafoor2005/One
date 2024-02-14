@@ -1,406 +1,634 @@
-// import 'package:flutter/material.dart';
-// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-// import 'package:one/features/posts/screens/alerts_page.dart';
-// import 'package:one/features/home/screens/page2.dart';
-// import 'package:one/features/posts/screens/post_page.dart';
-// import 'package:one/features/settings/screens/account_page.dart';
-// import 'package:routemaster/routemaster.dart';
+import 'dart:async';
 
-// class HomePage extends StatefulWidget {
-//   const HomePage({super.key});
-
-//   @override
-//   State<HomePage> createState() => _HomePageState();
-// }
-
-// class _HomePageState extends State<HomePage> {
-//   Widget currentBody = const AlertsPage();
-
-//   void changeBody(Widget a) {
-//     currentBody = a;
-//     setState(() {});
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       // backgroundColor: Colors.white.withAlpha(254),
-//       // backgroundColor: const Color.fromARGB(255, 107, 58, 244),
-//       backgroundColor: const Color.fromARGB(255, 161, 141, 219),
-//       body: currentBody,
-//       bottomNavigationBar: BottomAppBar(
-//         // color: const Color.fromRGBO(193, 219, 255, 1),
-//         color: const Color.fromARGB(255, 15, 16, 77), //  dark mode
-//         height: 70,
-//         padding: const EdgeInsets.symmetric(
-//           horizontal: 15,
-//         ),
-//         child: Row(
-//           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//           children: [
-//             navItem(
-//               icon: FontAwesomeIcons.house,
-//               navTo: const AlertsPage(),
-//             ),
-//             navItem(
-//               icon: FontAwesomeIcons.solidCircleUser,
-//               navTo: const PageTwo(),
-//             ),
-//             navItem(
-//               icon: FontAwesomeIcons.message,
-//               navTo: const PostPage(),
-//               onTap: () => Routemaster.of(context).push('/post-page'),
-//             ),
-//             navItem(
-//               icon: FontAwesomeIcons.gear,
-//               navTo: const AccountPage(),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   ElevatedButton navItem({
-//     VoidCallback? onTap,
-//     required IconData icon,
-//     required Widget navTo,
-//   }) {
-//     return ElevatedButton(
-//       onPressed: () {
-//         if (onTap == null) {
-//           if (currentBody.toString() != navTo.toString()) {
-//             changeBody(navTo);
-//           }
-//         } else {
-//           onTap();
-//         }
-//       },
-//       style: ElevatedButton.styleFrom(
-//         minimumSize: const Size.square(50),
-//         maximumSize: const Size.square(50),
-//         padding: EdgeInsets.zero,
-//         backgroundColor: currentBody.toString() == navTo.toString()
-//             ? const Color.fromRGBO(103, 65, 217, 1)
-//             : Colors.white,
-//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-//         alignment: Alignment.center,
-//         // elevation: currentBody.toString() == navTo.toString() ? 0 : 5,
-//         elevation: 0,
-//       ),
-//       child: FaIcon(
-//         icon,
-//         color: currentBody.toString() == navTo.toString()
-//             ? Colors.white
-//             : const Color.fromRGBO(103, 65, 217, 1),
-//       ),
-//     );
-//   }
-// }
-
-// class PageT extends StatelessWidget {
-//   const PageT({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Placeholder();
-//   }
-// }
-
-// class PageF extends StatelessWidget {
-//   const PageF({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Placeholder();
-//   }
-// }
-
-// // ---------------------------backup code---------------------------
-// // bottomNavigationBar:  BottomNavigationBar(
-// //   backgroundColor: Color.fromRGBO(24, 49, 83, 1),
-// //   // selectedItemColor: Colors.white,
-// //   showSelectedLabels: false,
-// //   showUnselectedLabels: false,
-// //   selectedFontSize: 0,
-// //   unselectedFontSize: 0,
-// //   iconSize: 20,
-// //   items: [
-// //     BottomNavigationBarItem(
-// //         activeIcon: Container(
-// //           margin: EdgeInsets.all(10),
-// //           padding: EdgeInsets.all(16),
-// //           decoration: BoxDecoration(
-// //             shape: BoxShape.rectangle,
-// //             color: Color.fromRGBO(103, 65, 217, 1),
-// //             borderRadius: BorderRadius.circular(12),
-// //           ),
-// //           child: const FaIcon(
-// //             FontAwesomeIcons.house,
-// //             color: Colors.white,
-// //           ),
-// //         ),
-// //         icon: Container(
-// //           child: const FaIcon(
-// //             FontAwesomeIcons.house,
-// //             color: Colors.white,
-// //           ),
-// //         ),
-// //         label: ''),
-// //     BottomNavigationBarItem(
-// //         icon: Container(
-// //           child: const FaIcon(
-// //             FontAwesomeIcons.circleUser,
-// //           ),
-// //         ),
-// //         label: ''),
-// //   ],
-// // ),
-
-import 'dart:developer';
-
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:one/features/auth/repository/auth_repository.dart';
-import 'package:one/features/posts/screens/alerts_page.dart';
-import 'package:one/features/settings/screens/account_page.dart';
-import 'package:one/notif.dart';
-import 'package:routemaster/routemaster.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:one/core/common/error_text.dart';
+import 'package:one/features/home/screens/news.dart';
+import 'package:one/features/home/screens/news_controller.dart';
 
-class HomePage extends ConsumerStatefulWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      appBar: AppBar(
+        leadingWidth: 70,
+        leading: Row(
+          children: [
+            const SizedBox(
+              width: 15,
+            ),
+            IconButton.filledTonal(
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+              icon: const Icon(Icons.menu),
+            ),
+          ],
+        ),
+        title: SvgPicture.asset('assets/icons/devloopers.svg'),
+        titleSpacing: 0,
+      ),
+      body: SafeArea(
+        child: LayoutBuilder(builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                HomePageBanners(
+                  constraints: constraints,
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                const SideTitle(titleText: 'News'),
+                SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 21),
+                  scrollDirection: Axis.horizontal,
+                  clipBehavior: Clip.none,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        height: 150,
+                        child: ref.watch(newsProvider).when(
+                              data: (data) {
+                                return ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    shrinkWrap: true,
+                                    itemCount: data.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      News a = data[index];
+                                      return NewsCard.fromNews(
+                                        news: a,
+                                      );
+                                    });
+                              },
+                              error: (error, stackTrace) {
+                                return ErrorText(error: error.toString());
+                              },
+                              loading: () => Container(
+                                padding: const EdgeInsets.all(19),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(17),
+                                  color:
+                                      Theme.of(context).colorScheme.onSecondary,
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      blurRadius: 3,
+                                      spreadRadius: -1,
+                                      color: Colors.black38,
+                                    )
+                                  ],
+                                ),
+                                clipBehavior: Clip.none,
+                                margin: const EdgeInsets.only(
+                                  right: 10,
+                                  bottom: 10,
+                                ),
+                                width: 300,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Lorem ipsum dolor sit amet.",
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontFamily: 'FlowCircular',
+                                        fontSize: 16,
+                                        height: 1,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 6,
+                                    ),
+                                    Text(
+                                      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto beatae laudantium commodi tempora accusantium incidunt.",
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontFamily: 'FlowCircular',
+                                        fontSize: 13,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 9,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Lorem, ipsum.",
+                                          style: const TextStyle(
+                                            fontFamily: 'FlowCircular',
+                                            fontSize: 12,
+                                            // color: Color.fromRGBO(151, 115, 115, 1),
+                                            color: Colors.black45,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                      ),
+                      Container(
+                        width: 200,
+                        height: 130,
+                        margin: const EdgeInsets.only(bottom: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(7),
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                        child: const Center(
+                            child: Text(
+                          'see more',
+                          style: TextStyle(
+                            fontFamily: 'AlegreyaSans',
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 20,
+                          ),
+                        )),
+                      )
+                    ],
+                  ),
+                ),
+                const SideTitle(titleText: 'Events'),
+                const SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: 21),
+                  clipBehavior: Clip.none,
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      EventCard(
+                        date: '25',
+                        month: 'DEC',
+                        eventTitle: "One app launch event",
+                        shortVenu: "Virtual event on Discord",
+                        organizers: "DevLoopers",
+                      ),
+                      EventCard(
+                        date: '30',
+                        month: 'OCT',
+                        eventTitle: "Tech Innovation Hackathon 2024",
+                        shortVenu: "A4 seminar hall, SRGEC",
+                      ),
+                      _EventCardSeeMore(),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 100,
+                )
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
-  int currentIndex = 0;
-  void setCurrentIndex(int i) {
-    setState(() {
-      currentIndex = i;
-    });
-  }
+class _EventCardSeeMore extends StatelessWidget {
+  const _EventCardSeeMore();
 
-  // String? _token;
-  String? initialMessage;
-  // ignore: unused_field
-  bool _resolved = false;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      width: 270,
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.orange,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black38,
+            blurRadius: 5,
+            spreadRadius: -2,
+            offset: Offset(1, 1),
+          ),
+        ],
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: const Center(
+          child: Text(
+        'See more',
+        style: TextStyle(
+          fontFamily: 'AlegreyaSans',
+          fontWeight: FontWeight.w800,
+          fontSize: 20,
+        ),
+      )),
+    );
+  }
+}
+
+class EventCard extends StatelessWidget {
+  final String date;
+  final String month;
+  final String eventTitle;
+  final String? organizers;
+  final String shortVenu;
+
+  const EventCard({
+    super.key,
+    required this.date,
+    required this.month,
+    required this.eventTitle,
+    this.organizers,
+    required this.shortVenu,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      width: 270,
+      height: 80,
+      margin: const EdgeInsets.only(right: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black38,
+            blurRadius: 5,
+            spreadRadius: -2,
+            offset: Offset(1, 1),
+          ),
+        ],
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        children: [
+          Container(
+            color: Colors.orange,
+            width: 87,
+            height: 87,
+            child: Stack(
+              children: [
+                Center(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Text(
+                          date,
+                          style: const TextStyle(
+                            fontFamily: "BlackHanSans",
+                            fontSize: 35,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Text(
+                          month,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: "BlackHanSans",
+                            fontSize: 20,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    eventTitle,
+                    style: const TextStyle(
+                      fontFamily: "BlackHanSans",
+                      fontSize: 12,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: organizers != null ? 1 : 2,
+                  ),
+                  organizers != null
+                      ? Row(
+                          children: [
+                            SvgPicture.asset(
+                              "assets/icons/micro_team.svg",
+                              width: 15,
+                            ),
+                            const SizedBox(
+                              width: 3,
+                            ),
+                            Text(
+                              organizers!,
+                              style: const TextStyle(
+                                fontFamily: "NotoSans",
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                color: Color.fromRGBO(0, 0, 0, 0.48),
+                              ),
+                            ),
+                          ],
+                        )
+                      : const SizedBox(),
+                  Row(
+                    children: [
+                      SvgPicture.asset(
+                        "assets/icons/micro_map.svg",
+                        width: 15,
+                      ),
+                      const SizedBox(
+                        width: 3,
+                      ),
+                      Text(
+                        shortVenu,
+                        style: const TextStyle(
+                          fontFamily: "NotoSans",
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class HomePageBanners extends StatefulWidget {
+  const HomePageBanners({
+    super.key,
+    required this.constraints,
+  });
+
+  final BoxConstraints constraints;
+
+  @override
+  State<HomePageBanners> createState() => _HomePageBannersState();
+}
+
+class _HomePageBannersState extends State<HomePageBanners> {
+  late ScrollController scrollController;
+  late Timer timer;
+
+  final banners = 3;
+  int position = 0;
+
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    FirebaseMessaging.instance.getInitialMessage().then(
-          (message) => setState(
-            () {
-              if (message == null) return;
-              _resolved = true;
-              initialMessage = message.data.toString();
-              // ref.read(messageArgumentsProvider.notifier).update((state) =>
-              //     MessageArguments(message: message, openedApplication: true));
-              // Routemaster.of(context).push('/notif');
-              final data = NotifPayload.fromMap(message.data);
-              Routemaster.of(context).push('post/${data.pid}');
-            },
-          ),
-        );
+    scrollController = ScrollController();
 
-    FirebaseMessaging.instance.getToken().then((value) => print(value));
-    FirebaseMessaging.onMessage.listen((message) {
-      // showFlutterNotification(message);
-      log('new message reciveed in foreground');
-    });
+    setTimer();
+  }
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
-      // Navigator.pushNamed(
-      //   context,
-      //   '/message',
-      //   arguments: MessageArguments(message, true),
-      // );
-      print("message : ${message.data}");
-      // ref
-      //     .read(messageArgumentsProvider.notifier)
-      //     .update((state) => MessageArguments(
-      //           message: message,
-      //           openedApplication: true,
-      //         ));
-      // Routemaster.of(context).push('/notif');
-      final data = NotifPayload.fromMap(message.data);
-      Routemaster.of(context).push('post/${data.pid}');
+  void setTimer() {
+    timer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      // debugPrint(timer.tick.toString());
+      if (position < banners - 1) {
+        position++;
+      } else {
+        position = 0;
+      }
+      scrollController.animateTo(
+        (widget.constraints.maxWidth - 21) * position,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
     });
   }
 
-  Future<void> onActionSelected(String value) async {
-    switch (value) {
-      case 'subscribe':
-        {
-          print(
-            'FlutterFire Messaging Example: Subscribing to topic "fcm_test".',
-          );
-          await FirebaseMessaging.instance.subscribeToTopic('fcm_test');
-          print(
-            'FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.',
-          );
-        }
-        break;
-      case 'unsubscribe':
-        {
-          print(
-            'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test".',
-          );
-          await FirebaseMessaging.instance.unsubscribeFromTopic('fcm_test');
-          print(
-            'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test" successful.',
-          );
-        }
-        break;
-      case 'get_apns_token':
-        {
-          if (defaultTargetPlatform == TargetPlatform.iOS ||
-              defaultTargetPlatform == TargetPlatform.macOS) {
-            print('FlutterFire Messaging Example: Getting APNs token...');
-            String? token = await FirebaseMessaging.instance.getAPNSToken();
-            print('FlutterFire Messaging Example: Got APNs token: $token');
-          } else {
-            print(
-              'FlutterFire Messaging Example: Getting an APNs token is only supported on iOS and macOS platforms.',
-            );
-          }
-        }
-        break;
-      default:
-        break;
-    }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    timer.cancel();
+    scrollController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    aadOAuth.hasCachedAccountInformation.then((value) => log(value.toString()));
-    return Scaffold(
-      body: IndexedStack(
-        index: currentIndex,
-        children: const [
-          AlertsPage(),
-          AccountPage(),
-        ],
-      ),
-      drawer: Drawer(
-        child: SafeArea(
-          child: Column(
-            children: [
-              ListView(
-                children: [
-                  ListTile(
-                    title: Text('events'),
-                  ),
-                  ListTile(
-                    title: Text('clubs'),
-                  ),
-                  ListTile(
-                    title: Text('library'),
-                  ),
-                  ListTile(
-                    title: Text('feed back'),
-                  ),
-                  ListTile(
-                    title: Text('about'),
-                  ),
-                ],
-              )
-            ],
-          ),
+    return GestureDetector(
+      onHorizontalDragDown: (details) {
+        debugPrint("down");
+        timer.cancel();
+        Timer(const Duration(seconds: 10), () {
+          debugPrint("up");
+          if (timer.isActive) timer.cancel();
+          setTimer();
+        });
+      },
+      child: SingleChildScrollView(
+        controller: scrollController,
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(
+          top: 21,
+          left: 21,
+          right: 21,
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        elevation: 8,
-        currentIndex: currentIndex,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        selectedFontSize: 0,
-        unselectedFontSize: 0,
-        // backgroundColor: Colors.grey.shade300,
-        // backgroundColor: Colors.white,
-        selectedItemColor: Colors.white,
-        items: [
-          navItem(Icons.home_rounded, 'home'),
-          navItem(Icons.person, 'you'),
-        ],
-        onTap: (value) {
-          if (currentIndex != value) {
-            setCurrentIndex(value);
-          }
-        },
-        enableFeedback: true,
+        child: Row(
+          children: [
+            Container(
+              width: widget.constraints.maxWidth - 42,
+              height: 140,
+              decoration: BoxDecoration(
+                color: Colors.greenAccent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(
+                child: Text("The"),
+              ),
+            ),
+            const SizedBox(
+              width: 21,
+            ),
+            Container(
+              width: widget.constraints.maxWidth - 42,
+              height: 140,
+              decoration: BoxDecoration(
+                color: Colors.greenAccent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(
+                child: Text("animated"),
+              ),
+            ),
+            const SizedBox(
+              width: 21,
+            ),
+            Container(
+              width: widget.constraints.maxWidth - 42,
+              height: 140,
+              decoration: BoxDecoration(
+                color: Colors.greenAccent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(
+                child: Text("Banners"),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-
-  BottomNavigationBarItem navItem(IconData icon, String lable) =>
-      BottomNavigationBarItem(
-        activeIcon: Container(
-          padding: const EdgeInsets.all(11),
-          decoration: BoxDecoration(
-            color: Colors.blue.shade700,
-            boxShadow: const [
-              BoxShadow(
-                blurRadius: 4,
-                color: Colors.black54,
-                spreadRadius: -1,
-              )
-            ],
-            borderRadius: BorderRadius.circular(18),
-          ),
-          margin: const EdgeInsets.all(10),
-          child: Icon(icon),
-        ),
-        icon: Container(
-          padding: const EdgeInsets.all(11),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: const [
-              BoxShadow(
-                blurRadius: 4,
-                color: Colors.black54,
-                spreadRadius: -1,
-              )
-            ],
-            borderRadius: BorderRadius.circular(20),
-          ),
-          margin: const EdgeInsets.all(10),
-          child: Icon(icon),
-        ),
-        label: lable,
-      );
 }
 
-// class MyDrawerTile extends StatelessWidget {
-//   const MyDrawerTile({
-//     super.key,
-//   });
+class SideTitle extends StatelessWidget {
+  final String titleText;
+  const SideTitle({
+    super.key,
+    required this.titleText,
+  });
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return TextButton(
-//       onPressed: () {
-//         Routemaster.of(context).push('/notif');
-//       },
-//       child: const Row(
-//         children: [
-//           Padding(
-//             padding: EdgeInsets.symmetric(
-//               horizontal: 20,
-//               vertical: 5,
-//             ),
-//             child: FaIcon(
-//               FontAwesomeIcons.bell,
-//               size: 20,
-//             ),
-//           ),
-//           Text('Notifications'),
-//         ],
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 21.0,
+        vertical: 10,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Divider(),
+          Text(
+            titleText,
+            style: const TextStyle(
+              fontFamily: 'BlackHanSans',
+              fontSize: 24,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class NewsCard extends StatelessWidget {
+  final String title;
+  final String desc;
+  final String timestamp;
+  const NewsCard({
+    super.key,
+    required this.title,
+    required this.desc,
+    required this.timestamp,
+  });
+
+  NewsCard.fromNews({super.key, required News news})
+      : title = news.title,
+        desc = news.description,
+        timestamp = news.sentBy;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(19),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(17),
+        // color: Color.fromRGBO(208, 208, 208, 0.39),
+        color: Theme.of(context).colorScheme.onSecondary,
+        // color: Colors.white,
+        // border: Border.all(
+        //     color: Colors.greenAccent,
+        //     ),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 3,
+            spreadRadius: -1,
+            color: Colors.black38,
+          )
+        ],
+      ),
+      clipBehavior: Clip.none,
+      margin: const EdgeInsets.only(
+        right: 10,
+        bottom: 10,
+      ),
+      width: 300,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: 'AlegreyaSans',
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+              height: 1,
+            ),
+          ),
+          const SizedBox(
+            height: 6,
+          ),
+          Text(
+            desc,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: 'NotoSans',
+              fontWeight: FontWeight.w500,
+              fontSize: 13,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(
+            height: 9,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                timestamp,
+                style: const TextStyle(
+                  fontFamily: 'NotoSans',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                  // color: Color.fromRGBO(151, 115, 115, 1),
+                  color: Colors.black45,
+                ),
+              ),
+              // const Text(
+              //   'read more',
+              //   style: TextStyle(
+              //     fontFamily: 'NotoSans',
+              //     fontWeight: FontWeight.w800,
+              //     fontSize: 12,
+              //     color: Colors.black45,
+              //     // decoration: TextDecoration.underline,
+              //   ),
+              // ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+}

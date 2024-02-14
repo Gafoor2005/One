@@ -7,7 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:one/core/models/ms_user_model.dart';
+import 'package:one/core/common/error_text.dart';
+import 'package:one/core/common/loader.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:one/firebase_options.dart';
@@ -24,7 +25,7 @@ Future<void> _firebaseMessagingBackgroundHandler(
   // showFlutterNotification(message);
   // If you're going to use other Firebase services in the background, such as Firestore,
   // make sure you call `initializeApp` before using other Firebase services.
-  print('Handling a background message ${message.messageId}');
+  debugPrint('Handling a background message ${message.messageId}');
 }
 
 late AndroidNotificationChannel channel;
@@ -92,7 +93,7 @@ void showFlutterNotification(RemoteMessage message) {
   AndroidNotification? android = message.notification?.android;
 
   if (notification != null && android != null && !kIsWeb) {
-    print("showing flutter notif");
+    debugPrint("showing flutter notif");
     flutterLocalNotificationsPlugin.show(
       notification.hashCode,
       notification.title,
@@ -123,7 +124,7 @@ Future<void> main() async {
 
   await dotenv.load(fileName: ".env");
   loginStatus = await aadOAuth.hasCachedAccountInformation;
-
+  log('message');
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -160,116 +161,43 @@ class _MyAppState extends ConsumerState<MyApp> {
     RemoteMessage message =
         RemoteMessage.fromMap(jsonDecode(response.payload ?? '{}'));
     log(message.notification?.title ?? 'nono');
+    // TODO add a condition to not display if sender-id is me
     // navkey.currentState!.push(MaterialPageRoute(
     //     builder: (context) => Notif(
     //           message: message,
     //         )));
   }
 
-  MsUserModel? userModel;
-
-  void getData(WidgetRef ref) async {
-    aadOAuth.getAccessToken().then((token) => ref
-        .watch(authControllerProvider.notifier)
-        .getCurrentUserDataFromMs(token!)
-        .then((msUser) => ref
-            .watch(authControllerProvider.notifier)
-            .getMsUserData(msUser.id)
-            .first
-            .then((value) =>
-                ref.read(userProvider.notifier).update((state) => value))));
-
-    setState(() {});
-  }
-  // void getData(WidgetRef ref, User data) async {
-  //   userModel = await ref
-  //       .watch(authControllerProvider.notifier)
-  //       .getUserData(data.uid)
-  //       .first;
-  //   ref.read(userProvider.notifier).update((state) => userModel);
-  //   setState(() {});
-  // }
-
   bool initDone = false;
 
   @override
   Widget build(BuildContext context) {
-    if (loginStatus && !initDone) {
-      initDone = true;
-      getData(ref);
-    }
-    RouteMap currentRouteMap = ref.watch(RouteProvider);
-    return MaterialApp.router(
-      title: 'One app',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 49, 8, 130),
-        ),
-        // textTheme:
-        //     const TextTheme(bodyMedium: TextStyle(color: Colors.white70)),
-        useMaterial3: true,
-      ),
-      routerDelegate: RoutemasterDelegate(
-        routesBuilder: (context) {
-          // if (data) {
-          //   getData(ref);
-          //   if (userModel != null) {
-          //     return loggedInRoute;
-          //   }
-          // }
-          // return loggedOutRoute;
-          return currentRouteMap;
-        },
-        navigatorKey: navkey,
-      ),
-      routeInformationParser: const RoutemasterParser(),
-    );
-    // return isLoading
-    //     ? const Loader()
-    //     : MaterialApp.router(
-    //         title: 'Flutter Demo',
-    //         theme: ThemeData(
-    //           colorScheme: ColorScheme.fromSeed(
-    //             seedColor: const Color.fromARGB(255, 49, 8, 130),
-    //           ),
-    //           // textTheme:
-    //           //     const TextTheme(bodyMedium: TextStyle(color: Colors.white70)),
-    //           useMaterial3: true,
-    //         ),
-    //         routerDelegate: RoutemasterDelegate(
-    //           routesBuilder: (context) => ref.watch(routeProvider),
-    //           navigatorKey: navkey,
-    //         ),
-    //         routeInformationParser: const RoutemasterParser(),
-    //       );
-
-    //   data: (data) => MaterialApp.router(
-    //     title: 'Flutter Demo',
-    //     theme: ThemeData(
-    //       colorScheme: ColorScheme.fromSeed(
-    //         seedColor: const Color.fromARGB(255, 49, 8, 130),
-    //       ),
-    //       // textTheme:
-    //       //     const TextTheme(bodyMedium: TextStyle(color: Colors.white70)),
-    //       useMaterial3: true,
-    //     ),
-    //     routerDelegate: RoutemasterDelegate(
-    //       routesBuilder: (context) {
-    //         if (data != null) {
-    //           getData(ref, data);
-    //           if (userModel != null) {
-    //             return loggedInRoute;
-    //           }
-    //         }
-    //         return loggedOutRoute;
-    //       },
-    //       navigatorKey: navkey,
-    //     ),
-    //     routeInformationParser: const RoutemasterParser(),
-    //   ),
-    //   error: (error, stackTrace) => ErrorText(error: error.toString()),
-    //   loading: () => const Loader(),
-    // );
+    // if (loginStatus && !initDone) {
+    //   initDone = true;
+    //   getData(ref);
+    // }
+    return ref.watch(authStateChangeProvider).when(
+        data: (data) => MaterialApp.router(
+              title: 'One app',
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: const Color.fromARGB(255, 0, 35, 68),
+                ),
+                useMaterial3: true,
+              ),
+              routerDelegate: RoutemasterDelegate(
+                routesBuilder: (context) {
+                  if (data != null) {
+                    return loggedInRoute;
+                  }
+                  return loggedOutRoute;
+                },
+                navigatorKey: navkey,
+              ),
+              routeInformationParser: const RoutemasterParser(),
+            ),
+        error: (error, stackTrace) => ErrorText(error: error.toString()),
+        loading: () => const Loader());
   }
 }
 

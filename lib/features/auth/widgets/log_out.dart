@@ -1,10 +1,6 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/auth/repository/auth_repository.dart';
-import 'package:one/main.dart';
-import 'package:one/router.dart';
 
 class LogOutButton extends ConsumerWidget {
   const LogOutButton({
@@ -12,14 +8,15 @@ class LogOutButton extends ConsumerWidget {
   }) : super(key: key);
 
   void logOut(WidgetRef ref) {
-    loginStatus = false;
-    if (ref.watch(userProvider)?.roles != null) {
-      for (String topic in ref.watch(userProvider)!.roles!) {
-        FirebaseMessaging.instance.unsubscribeFromTopic(topic);
-      }
-    }
-    aadOAuth.logout();
-    ref.read(RouteProvider.notifier).setRoute(loggedOutRoute);
+    // loginStatus = false;
+    // if (ref.watch(userProvider)?.roles != null) {
+    //   for (String topic in ref.watch(userProvider)!.roles!) {
+    //     FirebaseMessaging.instance.unsubscribeFromTopic(topic);
+    //   }
+    // }
+    // aadOAuth.logout();
+    // ref.read(routeProvider.notifier).setRoute(loggedOutRoute);
+    ref.read(authRepositoryProvider).logOut();
   }
 
   @override

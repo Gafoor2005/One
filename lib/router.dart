@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/features/auth/screens/login_page.dart';
-import 'package:one/features/home/screens/home_page.dart';
+import 'package:one/features/auth/screens/need_more_info.dart';
+import 'package:one/features/home/screens/add_news.dart';
+import 'package:one/features/home/screens/home_frame.dart';
 import 'package:one/features/posts/screens/post_details.dart';
 import 'package:one/features/posts/screens/post_page.dart';
 import 'package:one/features/posts/screens/upload_file.dart';
@@ -16,19 +18,22 @@ class RouteNotifier extends StateNotifier<RouteMap> {
   }
 }
 
-final RouteProvider = StateNotifierProvider<RouteNotifier, RouteMap>((ref) {
+final routeProvider = StateNotifierProvider<RouteNotifier, RouteMap>((ref) {
   return RouteNotifier();
 });
 
 final loggedOutRoute = RouteMap(routes: {
   '/': (_) => const MaterialPage(child: LoginPage()),
+  '/more-info': (_) => const MaterialPage(child: NeedMoreInfo()),
   '/notif': (r) => const MaterialPage(child: Notif()),
 });
+
 final loggedInRoute = RouteMap(routes: {
-  '/': (_) => const MaterialPage(child: HomePage()),
+  '/': (_) => const MaterialPage(child: HomeFrame()),
   '/upload-file': (_) => const MaterialPage(child: UploadFile()),
   '/create-post': (_) => const MaterialPage(child: CreatePostPage()),
   '/notif': (_) => const MaterialPage(child: Notif()),
+  '/add-news': (_) => const MaterialPage(child: AddNews()),
   '/post/:id': (info) => MaterialPage(
         child: PostDetails(
           id: info.pathParameters['id']!,

@@ -48,8 +48,8 @@ class PostController extends StateNotifier<bool> {
     final Post post = Post(
       id: postId,
       title: title,
-      username: user.displayName,
-      uid: user.id,
+      username: user.name,
+      uid: user.uid,
       createdAt: DateTime.now(),
       description: description,
       tags: (tags == null) ? ["everyone"] : tags,
