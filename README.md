@@ -17,3 +17,5 @@ samples, guidance on mobile development, and a full API reference. -->
 ## Download latest release apk.
 
 only use your __student id__ provided by __SRGEC__ to sign-in into the app
+
+## [Clik here to Download](https://github.com/Gafoor2005/One/releases/download/release/Oneapp-v1.0.0.apk)
