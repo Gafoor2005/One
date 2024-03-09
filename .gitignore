@@ -45,3 +45,6 @@ app.*.map.json
 
 # envs
 *.env
+
+# mySecrets
+.hidden_items/
