@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -15,6 +16,8 @@ import 'package:http/http.dart' as http;
 
 import 'chat_page.dart';
 import 'library_page.dart';
+
+final settingsProvider = StateProvider<Map<String, dynamic>>((ref) => {});
 
 class HomeFrame extends ConsumerStatefulWidget {
   const HomeFrame({super.key});
@@ -89,6 +92,8 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
       logOnline();
       final response = await http.get(Uri.parse(
           "https://raw.githubusercontent.com/Gafoor2005/One/main/settings.json"));
+      final Map<String, dynamic> settings = jsonDecode(response.body);
+      ref.watch(settingsProvider.notifier).update((state) => settings);
       log(response.body);
     });
   }

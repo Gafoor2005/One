@@ -211,10 +211,13 @@ class AttendancePage extends ConsumerStatefulWidget {
 }
 
 class _AttendancePageState extends ConsumerState<AttendancePage> {
-  void getAttendance(BuildContext context) {
-    ref
+  bool access = true;
+  void getAttendance(BuildContext context) async {
+    if (await ref
         .watch(apiControllerProvider.notifier)
-        .getAttendance(context, ref.watch(userProvider)!.rollNO);
+        .getAttendance(context, ref.watch(userProvider)!.rollNO)) {
+      access = false;
+    }
     setState(() {});
   }
 
@@ -265,8 +268,11 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
       );
     } else {
       getAttendance(context);
-      return const Scaffold(
-        body: Center(child: Text("loading")),
+      return Scaffold(
+        body: Center(
+            child: (access)
+                ? const Text("loading")
+                : const Text("restriced acess!!")),
       );
     }
   }

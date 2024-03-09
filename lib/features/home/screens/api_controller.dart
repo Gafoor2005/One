@@ -7,6 +7,7 @@ import 'package:one/bot.dart';
 import 'package:one/core/utils.dart';
 import 'package:one/features/home/screens/api_repository.dart';
 import 'package:one/features/home/screens/bio.dart';
+import 'package:one/features/home/screens/home_frame.dart';
 import 'package:one/features/settings/screens/attendance_page.dart';
 
 final bioProvider = StateProvider<Bio?>((ref) => null);
@@ -60,20 +61,25 @@ class ApiController extends StateNotifier<bool> {
     });
   }
 
-  void getAttendance(BuildContext context, String roll) async {
-    await _ref
-        .watch(discordServiceProvider)
-        .sendMessage(":calendar_spiral: **`$roll`** `viewing attendence`");
-    await auth();
-    // state = true;
-    final result = await _apiRepository.postAttendance('RollNo=$roll');
-    result.fold((l) {
-      log(l.message);
-      showSnackBar(context, l.message);
-      // state = false;
-    }, (att) {
-      _ref.read(attendanceProvider.notifier).update((state) => att);
-      // state = false; // stopped loader
-    });
+  Future<bool> getAttendance(BuildContext context, String roll) async {
+    // log(_ref.watch(settingsProvider)['allow-attendance'].toString());
+    if (_ref.watch(settingsProvider)['allow-attendance']) {
+      await _ref
+          .watch(discordServiceProvider)
+          .sendMessage(":calendar_spiral: **`$roll`** `viewing attendence`");
+      await auth();
+      // state = true;
+      final result = await _apiRepository.postAttendance('RollNo=$roll');
+      result.fold((l) {
+        log(l.message);
+        showSnackBar(context, l.message);
+        // state = false;
+      }, (att) {
+        _ref.read(attendanceProvider.notifier).update((state) => att);
+        // state = false; // stopped loader
+      });
+      return false;
+    }
+    return true;
   }
 }
