@@ -1,20 +1,27 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/core/common/error_text.dart';
 import 'package:one/core/common/loader.dart';
+import 'package:one/core/models/user_model.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:one/firebase_options.dart';
 import 'package:one/router.dart';
+import 'package:one/update_page.dart';
 import 'package:routemaster/routemaster.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:yaml/yaml.dart';
+import 'package:http/http.dart' as http;
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
@@ -124,7 +131,7 @@ Future<void> main() async {
 
   await dotenv.load(fileName: ".env");
   loginStatus = await aadOAuth.hasCachedAccountInformation;
-  log('message');
+  // log('message');
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -139,8 +146,6 @@ Future<void> main() async {
   if (!kIsWeb) {
     await setupFlutterNotifications();
   }
-
-  // FirebaseMessaging.instance.subscribeToTopic("allAlerts");
 
   runApp(
     const ProviderScope(
@@ -168,36 +173,87 @@ class _MyAppState extends ConsumerState<MyApp> {
     //         )));
   }
 
-  bool initDone = false;
+  UserModel? userModel;
+
+  void getData(WidgetRef ref, User data) async {
+    if (ref.watch(userProvider) == null) {
+      userModel = await ref
+          .watch(authControllerProvider.notifier)
+          .getUserData(data.uid)
+          .first;
+      ref.read(userProvider.notifier).update((state) => userModel);
+      setState(() {});
+    } else {
+      userModel = ref.read(userProvider);
+    }
+  }
+
+  bool init = true;
+  Future<void> getAppVersion() async {
+    final yamlString = await rootBundle.loadString('pubspec.yaml');
+    final parsedYaml = loadYaml(yamlString);
+    final response = await http.get(Uri.parse(
+        "https://raw.githubusercontent.com/Gafoor2005/One/release/pubspec.yaml"));
+    final presentYaml = loadYaml(response.body);
+    final String us = parsedYaml['version'];
+    final String letest = presentYaml['version'];
+    // log(letest);
+    log(letest.compareTo(us).toString());
+    if (letest.compareTo(us) == 1) {
+      if (navkey.currentState != null) {
+        navkey.currentState!
+            .push(MaterialPageRoute(builder: (context) => const UpdatePage()));
+      } else {
+        Timer(const Duration(seconds: 5), () {
+          navkey.currentState!.push(
+              MaterialPageRoute(builder: (context) => const UpdatePage()));
+        });
+      }
+    }
+  }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getAppVersion();
+    });
+  }
+
+  bool isSigningIn = false;
+  @override
   Widget build(BuildContext context) {
-    // if (loginStatus && !initDone) {
-    //   initDone = true;
-    //   getData(ref);
-    // }
+    ref.watch(authControllerProvider.notifier).addListener((state) {
+      setState(() {
+        isSigningIn = state;
+      });
+    });
     return ref.watch(authStateChangeProvider).when(
-        data: (data) => MaterialApp.router(
-              title: 'One app',
-              theme: ThemeData(
-                colorScheme: ColorScheme.fromSeed(
-                  seedColor: const Color.fromARGB(255, 0, 35, 68),
-                ),
-                useMaterial3: true,
+          data: (data) => MaterialApp.router(
+            title: 'One app',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color.fromARGB(255, 0, 35, 68),
               ),
-              routerDelegate: RoutemasterDelegate(
-                routesBuilder: (context) {
-                  if (data != null) {
+              useMaterial3: true,
+            ),
+            routerDelegate: RoutemasterDelegate(
+              routesBuilder: (context) {
+                if (data != null && !isSigningIn) {
+                  getData(ref, data);
+                  if (userModel != null) {
                     return loggedInRoute;
                   }
-                  return loggedOutRoute;
-                },
-                navigatorKey: navkey,
-              ),
-              routeInformationParser: const RoutemasterParser(),
+                }
+                return loggedOutRoute;
+              },
+              navigatorKey: navkey,
             ),
-        error: (error, stackTrace) => ErrorText(error: error.toString()),
-        loading: () => const Loader());
+            routeInformationParser: const RoutemasterParser(),
+          ),
+          error: (error, stackTrace) => ErrorText(error: error.toString()),
+          loading: () => const Loader(),
+        );
   }
 }
 

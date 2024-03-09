@@ -1,15 +1,17 @@
 import 'dart:developer';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:one/bot.dart';
+import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:one/features/home/screens/home_page.dart';
 import 'package:one/features/settings/screens/account_page.dart';
 import 'package:one/notif.dart';
 import 'package:routemaster/routemaster.dart';
+import 'package:http/http.dart' as http;
 
 import 'chat_page.dart';
 import 'library_page.dart';
@@ -57,20 +59,22 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
           ),
         );
 
-    FirebaseMessaging.instance.getToken().then((value) => print(value));
+    FirebaseMessaging.instance
+        .getToken()
+        .then((value) => log(value.toString()));
     FirebaseMessaging.onMessage.listen((message) {
       // showFlutterNotification(message);
       log('new message reciveed in foreground');
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
+      log('A new onMessageOpenedApp event was published!');
       // Navigator.pushNamed(
       //   context,
       //   '/message',
       //   arguments: MessageArguments(message, true),
       // );
-      print("message : ${message.data}");
+      log("message : ${message.data}");
       // ref
       //     .read(messageArgumentsProvider.notifier)
       //     .update((state) => MessageArguments(
@@ -81,50 +85,68 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
       final data = NotifPayload.fromMap(message.data);
       Routemaster.of(context).push('post/${data.pid}');
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      logOnline();
+      final response = await http.get(Uri.parse(
+          "https://raw.githubusercontent.com/Gafoor2005/One/main/settings.json"));
+      log(response.body);
+    });
   }
 
-  Future<void> onActionSelected(String value) async {
-    switch (value) {
-      case 'subscribe':
-        {
-          print(
-            'FlutterFire Messaging Example: Subscribing to topic "fcm_test".',
-          );
-          await FirebaseMessaging.instance.subscribeToTopic('fcm_test');
-          print(
-            'FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.',
-          );
-        }
-        break;
-      case 'unsubscribe':
-        {
-          print(
-            'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test".',
-          );
-          await FirebaseMessaging.instance.unsubscribeFromTopic('fcm_test');
-          print(
-            'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test" successful.',
-          );
-        }
-        break;
-      case 'get_apns_token':
-        {
-          if (defaultTargetPlatform == TargetPlatform.iOS ||
-              defaultTargetPlatform == TargetPlatform.macOS) {
-            print('FlutterFire Messaging Example: Getting APNs token...');
-            String? token = await FirebaseMessaging.instance.getAPNSToken();
-            print('FlutterFire Messaging Example: Got APNs token: $token');
-          } else {
-            print(
-              'FlutterFire Messaging Example: Getting an APNs token is only supported on iOS and macOS platforms.',
-            );
-          }
-        }
-        break;
-      default:
-        break;
+  void logOnline() async {
+    await ref.watch(discordServiceProvider).sendMessage(
+        ":green_circle: **`${ref.watch(userProvider)!.rollNO}`** `Online`");
+    checkDN();
+  }
+
+  void checkDN() {
+    if (ref.watch(userProvider)!.displayName == null) {
+      Routemaster.of(context).push("/set-displayname");
     }
   }
+
+  // Future<void> onActionSelected(String value) async {
+  //   switch (value) {
+  //     case 'subscribe':
+  //       {
+  //         print(
+  //           'FlutterFire Messaging Example: Subscribing to topic "fcm_test".',
+  //         );
+  //         await FirebaseMessaging.instance.subscribeToTopic('fcm_test');
+  //         print(
+  //           'FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.',
+  //         );
+  //       }
+  //       break;
+  //     case 'unsubscribe':
+  //       {
+  //         print(
+  //           'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test".',
+  //         );
+  //         await FirebaseMessaging.instance.unsubscribeFromTopic('fcm_test');
+  //         print(
+  //           'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test" successful.',
+  //         );
+  //       }
+  //       break;
+  //     case 'get_apns_token':
+  //       {
+  //         if (defaultTargetPlatform == TargetPlatform.iOS ||
+  //             defaultTargetPlatform == TargetPlatform.macOS) {
+  //           print('FlutterFire Messaging Example: Getting APNs token...');
+  //           String? token = await FirebaseMessaging.instance.getAPNSToken();
+  //           print('FlutterFire Messaging Example: Got APNs token: $token');
+  //         } else {
+  //           print(
+  //             'FlutterFire Messaging Example: Getting an APNs token is only supported on iOS and macOS platforms.',
+  //           );
+  //         }
+  //       }
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +158,7 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
       drawerEnableOpenDragGesture: false,
       drawer: Drawer(
         width: 280,
-        backgroundColor: Color.fromARGB(255, 245, 255, 237),
+        backgroundColor: const Color.fromARGB(255, 245, 255, 237),
         child: SafeArea(
           child: Column(
             children: [
@@ -148,38 +170,38 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
                     onTap: () {
                       Routemaster.of(context).push('/add-news');
                     },
-                    title: Text(
+                    title: const Text(
                       'add News',
                       style: TextStyle(fontFamily: "AlegreyaSans"),
                     ),
-                    leading: Icon(Icons.newspaper),
+                    leading: const Icon(Icons.newspaper),
                   ),
                   ListTile(
                     onTap: () {},
-                    title: Text(
+                    title: const Text(
                       'News',
                       style: TextStyle(fontFamily: "AlegreyaSans"),
                     ),
-                    leading: Icon(Icons.newspaper),
+                    leading: const Icon(Icons.newspaper),
                   ),
                   ListTile(
                     onTap: () {},
-                    title: Text(
+                    title: const Text(
                       'Events',
                       style: TextStyle(fontFamily: "AlegreyaSans"),
                     ),
-                    leading: Icon(Icons.event),
+                    leading: const Icon(Icons.event),
                   ),
-                  ListTile(
+                  const ListTile(
                     title: Text('clubs'),
                   ),
-                  ListTile(
+                  const ListTile(
                     title: Text('library'),
                   ),
-                  ListTile(
+                  const ListTile(
                     title: Text('feed back'),
                   ),
-                  ListTile(
+                  const ListTile(
                     title: Text('about'),
                   ),
                 ],

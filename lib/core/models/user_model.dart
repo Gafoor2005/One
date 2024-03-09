@@ -4,89 +4,97 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 class UserModel {
+  final String? displayName;
   final String name;
   final String profilePic;
   final String uid;
+  final String oid;
+  final String? fcm;
   final String email;
-  final bool isAuthenticated;
   final bool? isAdmin;
-  final Batch year;
-  final Department department;
-  final Section section;
+  final String phoneNo;
   final String rollNO;
+  final DateTime lastSignInTime;
   final List<String>? roles;
   UserModel({
+    this.displayName,
     required this.name,
     required this.profilePic,
     required this.uid,
+    required this.oid,
+    this.fcm,
     required this.email,
-    required this.isAuthenticated,
     this.isAdmin,
-    required this.year,
-    required this.department,
-    required this.section,
+    required this.phoneNo,
     required this.rollNO,
+    required this.lastSignInTime,
     this.roles,
   });
 
   UserModel copyWith({
+    String? displayName,
     String? name,
     String? profilePic,
     String? uid,
+    String? oid,
+    String? fcm,
     String? email,
-    bool? isAuthenticated,
     bool? isAdmin,
-    Batch? year,
-    Department? department,
-    Section? section,
+    String? phoneNo,
     String? rollNO,
+    DateTime? lastSignInTime,
     List<String>? roles,
   }) {
     return UserModel(
+      displayName: displayName ?? this.displayName,
       name: name ?? this.name,
       profilePic: profilePic ?? this.profilePic,
       uid: uid ?? this.uid,
+      oid: oid ?? this.oid,
+      fcm: fcm ?? this.fcm,
       email: email ?? this.email,
-      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isAdmin: isAdmin ?? this.isAdmin,
-      year: year ?? this.year,
-      department: department ?? this.department,
-      section: section ?? this.section,
+      phoneNo: phoneNo ?? this.phoneNo,
       rollNO: rollNO ?? this.rollNO,
+      lastSignInTime: lastSignInTime ?? this.lastSignInTime,
       roles: roles ?? this.roles,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'displayName': displayName,
       'name': name,
       'profilePic': profilePic,
       'uid': uid,
+      'oid': oid,
+      'fcm': fcm,
       'email': email,
-      'isAuthenticated': isAuthenticated,
       'isAdmin': isAdmin,
-      'year': year.toMap(),
-      'department': department.name,
-      'section': section.name,
+      'phoneNo': phoneNo,
       'rollNO': rollNO,
+      'lastSignInTime': lastSignInTime.millisecondsSinceEpoch,
       'roles': roles,
     };
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
+      displayName:
+          map['displayName'] != null ? map['displayName'] as String : null,
       name: map['name'] as String,
       profilePic: map['profilePic'] as String,
       uid: map['uid'] as String,
+      oid: map['oid'] as String,
+      fcm: map['fcm'] != null ? map['fcm'] as String : null,
       email: map['email'] as String,
-      isAuthenticated: map['isAuthenticated'] as bool,
       isAdmin: map['isAdmin'] != null ? map['isAdmin'] as bool : null,
-      year: Batch.fromMap(map['year'] as Map<String, dynamic>),
-      department: departmentFromString(map['department']) as Department,
-      section: sectionFromString(map['section']) as Section,
+      phoneNo: map['phoneNo'] as String,
       rollNO: map['rollNO'] as String,
+      lastSignInTime:
+          DateTime.fromMillisecondsSinceEpoch(map['lastSignInTime'] as int),
       roles: map['roles'] != null
-          ? List<String>.from((map['roles'] as List<String>))
+          ? (map['roles'] as List).map((item) => item as String).toList()
           : null,
     );
   }
@@ -98,38 +106,40 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(name: $name, profilePic: $profilePic, uid: $uid, email: $email, isAuthenticated: $isAuthenticated, isAdmin: $isAdmin, year: $year, department: $department, section: $section, rollNO: $rollNO, roles: $roles)';
+    return 'UserModel(displayName: $displayName, name: $name, profilePic: $profilePic, uid: $uid, oid: $oid, fcm: $fcm, email: $email, isAdmin: $isAdmin, phoneNo: $phoneNo, rollNO: $rollNO, lastSignInTime: $lastSignInTime, roles: $roles)';
   }
 
   @override
   bool operator ==(covariant UserModel other) {
     if (identical(this, other)) return true;
 
-    return other.name == name &&
+    return other.displayName == displayName &&
+        other.name == name &&
         other.profilePic == profilePic &&
         other.uid == uid &&
+        other.oid == oid &&
+        other.fcm == fcm &&
         other.email == email &&
-        other.isAuthenticated == isAuthenticated &&
         other.isAdmin == isAdmin &&
-        other.year == year &&
-        other.department == department &&
-        other.section == section &&
+        other.phoneNo == phoneNo &&
         other.rollNO == rollNO &&
+        other.lastSignInTime == lastSignInTime &&
         listEquals(other.roles, roles);
   }
 
   @override
   int get hashCode {
-    return name.hashCode ^
+    return displayName.hashCode ^
+        name.hashCode ^
         profilePic.hashCode ^
         uid.hashCode ^
+        oid.hashCode ^
+        fcm.hashCode ^
         email.hashCode ^
-        isAuthenticated.hashCode ^
         isAdmin.hashCode ^
-        year.hashCode ^
-        department.hashCode ^
-        section.hashCode ^
+        phoneNo.hashCode ^
         rollNO.hashCode ^
+        lastSignInTime.hashCode ^
         roles.hashCode;
   }
 }

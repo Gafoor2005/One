@@ -11,12 +11,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:one/bot.dart';
 import 'package:one/core/failuer.dart';
 import 'package:one/core/models/ms_user_model.dart';
 import 'package:one/core/models/user_model.dart';
 import 'package:one/core/providers/firebase_providers.dart';
 import 'package:one/core/type_defs.dart';
-import 'package:one/core/utils.dart';
+import 'package:one/features/auth/controller/auth_controller.dart';
+import 'package:one/features/home/screens/api_controller.dart';
+import 'package:one/features/posts/screens/post_page.dart';
+import 'package:one/features/settings/screens/attendance_page.dart';
 import 'package:one/main.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -77,18 +81,18 @@ class AuthRepository {
       msAuthProvider.setCustomParameters({
         "prompt": "consent",
         "tenant": "organizations",
-        // "login_hint": "22481A05F2@gecgudlavallerumic.in"
-        // "login_hint": "gafoor.110705@outlook.com"
-        // "domain_hint": "gecgudlavallerumic.in"
+        // "login_hint": "abc@def.gh"
+        // "domain_hint": "example.com"
       });
       _userCredential = await _auth.signInWithProvider(msAuthProvider);
+
       // getCurrentUserDataFromMs(userCredential.credential!.accessToken ?? '');
       UserModel userModel;
       // log(_userCredential!.credential!.accessToken.toString());
-      log(_userCredential!.toString());
+      // log(_userCredential!.toString());
+
       if (_userCredential!.additionalUserInfo!.isNewUser) {
-        String photoUrl =
-            'https://firebasestorage.googleapis.com/v0/b/oneapp-af948.appspot.com/o/default%2FuserIconDark.png?alt=media&token=d11fde5e-ba19-4a48-9eb2-051317776d21';
+        String photoUrl = dotenv.env['PROFILE_ICON_URL']!;
 
         final response = await http.get(
           Uri.parse('https://graph.microsoft.com/v1.0/me/photo/\$value'),
@@ -100,7 +104,7 @@ class AuthRepository {
         );
         if (response.statusCode == 200) {
           final file = await createTempFileFromPostRequestBody(response);
-          log(file.path);
+          // log(file.path);
           final storageRef = FirebaseStorage.instance
               .ref()
               .child('profilePictures/${_userCredential!.user!.uid}');
@@ -111,33 +115,56 @@ class AuthRepository {
             //Success: get the download URL
             photoUrl = await storageRef.getDownloadURL();
           } catch (error) {
-            log(error.toString());
+            // log(error.toString());
+            rethrow;
           }
         }
+        final String fullName =
+            _userCredential!.additionalUserInfo!.profile!['givenName'] +
+                " " +
+                _userCredential!.additionalUserInfo!.profile!['surname'];
+        var theName = [];
+        fullName.split(" ").forEach((e) {
+          theName.add(e.capitalize());
+        });
         userModel = UserModel(
-          name: _userCredential!.user!.displayName ?? "no name",
-          email: _userCredential!.user!.email ?? "notfound@email.com",
+          name: theName.join(" "),
+          email: _userCredential!.additionalUserInfo!.profile!['mail'] ??
+              "notfound@email.com",
           profilePic: photoUrl,
           uid: _userCredential!.user!.uid,
-          isAuthenticated: true,
-          year: Batch(fromYear: 2022),
-          department: Department.cse,
-          section: Section.c,
-          rollNO: "22481A05F2",
+          oid: _userCredential!.additionalUserInfo!.profile!['id'],
+          phoneNo: _userCredential!.additionalUserInfo!.profile!['mobilePhone'],
+          rollNO: _userCredential!.additionalUserInfo!.profile!['mail']!
+              .split('@')[0],
+          roles: (_userCredential!.additionalUserInfo!.profile!['jobTitle'] !=
+                  'null')
+              ? [_userCredential!.additionalUserInfo!.profile!['jobTitle']]
+              : [],
+          lastSignInTime: _userCredential!.user!.metadata.lastSignInTime!,
         );
-        // print(userCredential.user!.email.toString());
+        log(userModel.toString());
         await _users.doc(_userCredential!.user!.uid).set(userModel.toMap());
       } else {
         userModel = await getUserData(_userCredential!.user!.uid).first;
       }
-
+      // _firestore
+      //     .collectionGroup("registered")
+      //     .where("name", isEqualTo: "noob")
+      //     .snapshots()
+      //     .first
+      //     .then((value) {
+      //   for (var e in value.docs) {
+      //     log("${e.id} ${e.data().toString()} ${e.reference.path}  ${e.reference.parent.parent!.id}");
+      //   }
+      // });
       // log(_auth.authStateChanges().first.toString());
       return right(userModel);
     } on FirebaseException catch (e) {
-      log(e.message.toString());
+      // log(e.message.toString());
       return left(Failure(e.message.toString()));
     } catch (e) {
-      log(e.toString());
+      // log(e.toString());
       return left(Failure(e.toString()));
     }
   }
@@ -159,15 +186,14 @@ class AuthRepository {
       // log(userCredential.additionalUserInfo.toString());
       if (userCredential.additionalUserInfo!.isNewUser) {
         userModel = UserModel(
+          oid: '',
+          phoneNo: 'xyz',
+          lastSignInTime: DateTime(00),
           name: userCredential.user!.displayName ?? "no name",
           email: userCredential.user!.email ?? "notfound@email.com",
           profilePic: userCredential.user!.photoURL ?? 'assets/defaultUser.jpg',
           uid: userCredential.user!.uid,
-          isAuthenticated: true,
-          year: Batch(fromYear: 2022),
-          department: Department.cse,
-          section: Section.c,
-          rollNO: "22481A05F2",
+          rollNO: "rollno",
         );
         // print(userCredential.user!.email.toString());
         await _users.doc(userCredential.user!.uid).set(userModel.toMap());
@@ -189,7 +215,7 @@ class AuthRepository {
         'Authorization': 'Bearer $accessToken',
       },
     );
-    log(response.body);
+    // log(response.body);
     // Decode the JSON response.
     final user = MsUserModel.fromJson(response.body);
     return user;
@@ -200,10 +226,9 @@ class AuthRepository {
     String accessToken,
   ) async {
     final snap = await _users.doc(userModel.id).get();
-    log('snap ' + snap.toString());
+    // log('snap ' + snap.toString());
     if (!snap.exists) {
-      String photoUrl =
-          'https://firebasestorage.googleapis.com/v0/b/oneapp-af948.appspot.com/o/default%2FuserIconDark.png?alt=media&token=d11fde5e-ba19-4a48-9eb2-051317776d21';
+      String photoUrl = dotenv.env['PROFILE_ICON_URL']!;
       final response = await http.get(
         Uri.parse('https://graph.microsoft.com/v1.0/me/photo/\$value'),
         headers: {
@@ -213,7 +238,7 @@ class AuthRepository {
       );
       if (response.statusCode == 200) {
         final file = await createTempFileFromPostRequestBody(response);
-        log(file.path);
+        // log(file.path);
         final storageRef = FirebaseStorage.instance
             .ref()
             .child('profilePictures/${userModel.id}');
@@ -224,10 +249,10 @@ class AuthRepository {
           //Success: get the download URL
           photoUrl = await storageRef.getDownloadURL();
         } catch (error) {
-          log(error.toString());
+          // log(error.toString());
         }
       }
-      log(userModel.jobTitle ?? 'not student');
+      // log(userModel.jobTitle ?? 'not student');
       List<String>? roles = ['everyone'];
       if (userModel.jobTitle != null && userModel.jobTitle == "Student") {
         roles.add(userModel.jobTitle!);
@@ -249,7 +274,7 @@ class AuthRepository {
         }
         roles.add(batch);
       }
-      log(userModel.displayName.substring(6, 8));
+      // log(userModel.displayName.substring(6, 8));
       await _users.doc(userModel.id).set(userModel
           .copyWith(displayName: '', photo: photoUrl, roles: roles)
           .toMap());
@@ -257,9 +282,9 @@ class AuthRepository {
     return getMsUserData(userModel.id);
   }
 
-  void setDisplayName(MsUserModel userModel, String name) async {
+  void setDisplayName(UserModel userModel, String name) async {
     await _users
-        .doc(userModel.id)
+        .doc(userModel.uid)
         .set(userModel.copyWith(displayName: name).toMap());
   }
 
@@ -275,11 +300,18 @@ class AuthRepository {
   }
 
   Stream<UserModel> getUserData(String uid) {
-    return _users.doc(uid).snapshots().map(
-        (event) => UserModel.fromMap(event.data() as Map<String, dynamic>));
+    return _users.doc(uid).snapshots().map((event) {
+      log(event.data().toString());
+      return UserModel.fromMap(event.data() as Map<String, dynamic>);
+    });
   }
 
-  void logOut() async {
+  void logOut(WidgetRef ref) async {
+    await ref.watch(discordServiceProvider).sendMessage(
+        ":red_square: **`${ref.watch(userProvider)!.rollNO}`** `logged out`");
+    ref.watch(userProvider.notifier).update((state) => null);
+    ref.watch(attendanceProvider.notifier).update((state) => null);
+    ref.watch(bioProvider.notifier).update((state) => null);
     await _aadOAuth.logout();
     await _googleSignIn.signOut();
     await _auth.signOut();

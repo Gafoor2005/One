@@ -1,48 +1,124 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:one/core/models/user_model.dart';
 import 'package:one/core/utils.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
-import 'package:one/features/auth/repository/auth_repository.dart';
+import 'package:routemaster/routemaster.dart';
 
-class AccountPageProfile extends ConsumerWidget {
+class AccountPageProfile extends ConsumerStatefulWidget {
   const AccountPageProfile({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _AccountPageProfileState();
+}
+
+class _AccountPageProfileState extends ConsumerState<AccountPageProfile> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    log('innnit');
+  }
+
+  bool dropdown = false;
+  @override
+  Widget build(BuildContext context) {
     final UserModel? userModel = ref.watch(userProvider);
     return userModel != null
         ? Container(
             width: double.infinity,
-            margin: const EdgeInsets.all(20),
-            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8).copyWith(bottom: 0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: Colors.blue.shade50,
+              // color: Colors.blue.shade50,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(userModel.profilePic),
-                  onBackgroundImageError: (exception, stackTrace) =>
-                      showSnackBar(context, exception.toString()),
-                  radius: 50,
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(userModel.profilePic),
+                      onBackgroundImageError: (exception, stackTrace) =>
+                          showSnackBar(context, exception.toString()),
+                      radius: 25,
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: _UserTile(),
+                    ),
+                    (userModel.displayName != null)
+                        ? const SizedBox()
+                        : IconButton.filledTonal(
+                            onPressed: () {
+                              Routemaster.of(context).push('/set-displayname');
+                            },
+                            icon: FaIcon(
+                              FontAwesomeIcons.pen,
+                              size: 16,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          dropdown = !dropdown;
+                        });
+                      },
+                      icon: FaIcon(
+                        (dropdown)
+                            ? FontAwesomeIcons.circleChevronUp
+                            : FontAwesomeIcons.circleChevronDown,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
                 ),
+                dropdown
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Divider(
+                            height: 25,
+                          ),
+                          const Text(
+                            "Name",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            userModel.name,
+                            style: TextStyle(
+                              fontSize: (userModel.name.length > 30) ? 12 : 15,
+                              fontFamily: "NotoSans",
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          const Text(
+                            "Email",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            userModel.email,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontFamily: "NotoSans",
+                            ),
+                          ),
+                        ],
+                      )
+                    : const SizedBox(),
                 const SizedBox(
-                  height: 8,
-                ),
-                Text(
-                  userModel.name,
-                ),
-                const SizedBox(
-                  height: 4,
-                ),
-                Text(
-                  '${userModel.rollNO}',
-                ),
-                const SizedBox(
-                  height: 16,
+                  height: 18,
                 ),
                 (userModel.roles != null)
                     ? Wrap(
@@ -80,22 +156,45 @@ class AccountPageProfile extends ConsumerWidget {
   }
 }
 
+class _UserTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    UserModel userModel = ref.watch(userProvider)!;
+    // log("render");
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        userModel.displayName != null
+            ? Text(
+                userModel.displayName!,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontFamily: "AlegreyaSans",
+                ),
+              )
+            : const Text(
+                "No name",
+                style: TextStyle(color: Colors.black45),
+              ),
+        Text(
+          userModel.rollNO,
+          style: const TextStyle(
+            fontFamily: "Monospace",
+            letterSpacing: 0,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _OtherInfo extends ConsumerWidget {
   const _OtherInfo();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final UserModel userModel = UserModel(
-        name: 'name',
-        profilePic:
-            'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
-        uid: 'uid',
-        email: 'email',
-        isAuthenticated: true,
-        year: Batch(fromYear: 2022),
-        department: Department.aiml,
-        section: Section.a,
-        rollNO: 'rollNO');
+    UserModel userModel =
+        ref.watch(userProvider as ProviderListenable<UserModel>);
 
     return Column(
       children: [
@@ -113,33 +212,31 @@ class _OtherInfo extends ConsumerWidget {
             Flexible(child: Text(userModel.rollNO)),
           ],
         ),
-        Row(
+        const Row(
           children: [
-            const Flexible(
+            Flexible(
               fit: FlexFit.tight,
               child: Text("Department"),
             ),
-            Flexible(child: Text(userModel.department.name)),
+            Flexible(child: Text("userModel.department.name")),
           ],
         ),
-        Row(
+        const Row(
           children: [
-            const Flexible(
+            Flexible(
               fit: FlexFit.tight,
               child: Text("Section"),
             ),
-            Flexible(child: Text(userModel.section.name)),
+            Flexible(child: Text("userModel.section.name")),
           ],
         ),
-        Row(
+        const Row(
           children: [
-            const Flexible(
+            Flexible(
               fit: FlexFit.tight,
               child: Text("Year"),
             ),
-            Flexible(
-                child: Text(
-                    '${userModel.year.fromYear} - ${userModel.year.toYear}')),
+            Flexible(child: Text("hello")),
           ],
         ),
       ],

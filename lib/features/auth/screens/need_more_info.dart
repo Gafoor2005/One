@@ -6,9 +6,7 @@ import 'package:one/core/models/ms_user_model.dart';
 import 'package:one/core/models/user_model.dart';
 import 'package:one/core/utils.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
-import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:one/features/auth/widgets/large_button.dart';
-import 'package:one/router.dart';
 import 'package:routemaster/routemaster.dart';
 
 class NeedMoreInfo extends ConsumerStatefulWidget {
@@ -40,10 +38,10 @@ class _NeedMoreInfoState extends ConsumerState<NeedMoreInfo> {
     isEnabled = false;
     setState(() {});
     log("message");
-    ref
-        .watch(authRepositoryProvider)
-        .setDisplayName(userModel, controller.text);
-    ref.read(routeProvider.notifier).setRoute(loggedInRoute);
+    // ref
+    //     .watch(authRepositoryProvider)
+    //     .setDisplayName(userModel, controller.text); // i forecely stopped from using
+    // ref.read(routeProvider.notifier).setRoute(loggedInRoute);
     Routemaster.of(context).replace('/');
   }
 

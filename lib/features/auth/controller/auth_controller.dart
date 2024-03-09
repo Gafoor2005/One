@@ -4,6 +4,7 @@ import 'package:aad_oauth/aad_oauth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:one/bot.dart';
 import 'package:one/core/models/ms_user_model.dart';
 import 'package:one/core/models/user_model.dart';
 import 'package:one/core/utils.dart';
@@ -22,8 +23,7 @@ final authControllerProvider = StateNotifierProvider<AuthController, bool>(
 );
 
 final authStateChangeProvider = StreamProvider((ref) {
-  final authController = ref.watch(authControllerProvider.notifier);
-  return authController.authStateChange;
+  return ref.watch(authControllerProvider.notifier).authStateChange;
 });
 
 final getUserDataProvider = StreamProvider.family((ref, String uid) {
@@ -50,6 +50,7 @@ class AuthController extends StateNotifier<bool> {
 
   void signInWithMS(BuildContext context) async {
     state = true; // started loader
+
     final result = await _authRepository.signInWithMS();
     result.fold(
       (l) {
@@ -58,10 +59,11 @@ class AuthController extends StateNotifier<bool> {
         state = false;
       },
       (user) async {
-        log('sign in');
+        await _ref
+            .watch(discordServiceProvider)
+            .sendMessage(":lock: **`${user.rollNO}`** `signed in`");
         _ref.read(userProvider.notifier).update((state) => user);
-        log('hoooho');
-        log(user.toString());
+        // log("from controller ${user.toString()}");
         if (user.roles != null) {
           for (String topic in user.roles!) {
             FirebaseMessaging.instance.subscribeToTopic(topic);
@@ -73,8 +75,12 @@ class AuthController extends StateNotifier<bool> {
     );
   }
 
-  void setDisplayName(MsUserModel userModel, String name) {
+  void setDisplayName(String name) {
+    UserModel userModel = _ref.watch(userProvider)!;
     _authRepository.setDisplayName(userModel, name);
+    _ref
+        .watch(userProvider.notifier)
+        .update((state) => userModel.copyWith(displayName: name));
   }
 
   Future<MsUserModel> getCurrentUserDataFromMs(String accessToken) async {
@@ -89,8 +95,7 @@ class AuthController extends StateNotifier<bool> {
     return _authRepository.getMsUserData(uid);
   }
 
-  void logout() async {
-    _authRepository.logOut();
-    // _ref.read(userProvider.notifier).update((state) => null);
+  void logout(WidgetRef ref) async {
+    _authRepository.logOut(ref);
   }
 }

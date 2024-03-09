@@ -47,15 +47,19 @@ class NewsController extends StateNotifier<bool> {
       timestamp: DateTime.now(),
     );
 
-    final res = await _newsRepository.addNews(news);
-    state = false;
-    res.fold(
-      (l) => showSnackBar(context, l.message),
-      (r) {
-        showSnackBar(context, 'news added successfully!');
-        // Routemaster.of(context).pop();
-      },
-    );
+    if (user.roles?.contains("Dev") ?? false) {
+      final res = await _newsRepository.addNews(news);
+      state = false;
+      res.fold(
+        (l) => showSnackBar(context, l.message),
+        (r) {
+          showSnackBar(context, 'news added successfully!');
+          // Routemaster.of(context).pop();
+        },
+      );
+    } else {
+      showSnackBar(context, "you can't");
+    }
     return newsId;
   }
 

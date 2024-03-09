@@ -7,6 +7,13 @@ import 'package:one/core/common/error_text.dart';
 import 'package:one/features/home/screens/news.dart';
 import 'package:one/features/home/screens/news_controller.dart';
 
+Map<String, String> headers = {
+  'Accept':
+      'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+};
+String sessionId = '';
+String frmAuth = '';
+
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -89,33 +96,33 @@ class HomePage extends ConsumerWidget {
                                   bottom: 10,
                                 ),
                                 width: 300,
-                                child: Column(
+                                child: const Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       "Lorem ipsum dolor sit amet.",
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontFamily: 'FlowCircular',
                                         fontSize: 16,
                                         height: 1,
                                       ),
                                     ),
-                                    const SizedBox(
+                                    SizedBox(
                                       height: 6,
                                     ),
                                     Text(
                                       "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto beatae laudantium commodi tempora accusantium incidunt.",
                                       maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontFamily: 'FlowCircular',
                                         fontSize: 13,
                                         height: 1.4,
                                       ),
                                     ),
-                                    const SizedBox(
+                                    SizedBox(
                                       height: 9,
                                     ),
                                     Row(
@@ -124,7 +131,7 @@ class HomePage extends ConsumerWidget {
                                       children: [
                                         Text(
                                           "Lorem, ipsum.",
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontFamily: 'FlowCircular',
                                             fontSize: 12,
                                             // color: Color.fromRGBO(151, 115, 115, 1),
@@ -184,9 +191,25 @@ class HomePage extends ConsumerWidget {
                     ],
                   ),
                 ),
+                // const Text("data"),
+                // ref.watch(bioProvider) == null
+                //     ? ElevatedButton(
+                //         onPressed: () {
+
+                //           Routemaster.of(context).push("/demo");
+                //         },
+                //         child: const Text("get"),
+                //       )
+                //     : Column(
+                //         children: [
+                //           Text(ref.watch(bioProvider)!.name),
+                //           Text(ref.watch(bioProvider)!.dob),
+                //           Text(ref.watch(bioProvider)!.rollNo),
+                //         ],
+                //       ),
                 const SizedBox(
                   height: 100,
-                )
+                ),
               ],
             ),
           );
@@ -434,10 +457,10 @@ class _HomePageBannersState extends State<HomePageBanners> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onHorizontalDragDown: (details) {
-        debugPrint("down");
+        // debugPrint("down");
         timer.cancel();
         Timer(const Duration(seconds: 10), () {
-          debugPrint("up");
+          // debugPrint("up");
           if (timer.isActive) timer.cancel();
           setTimer();
         });
@@ -453,7 +476,9 @@ class _HomePageBannersState extends State<HomePageBanners> {
         child: Row(
           children: [
             Container(
-              width: widget.constraints.maxWidth - 42,
+              width: widget.constraints.maxWidth != 0
+                  ? widget.constraints.maxWidth - 42
+                  : 100,
               height: 140,
               decoration: BoxDecoration(
                 color: Colors.greenAccent,

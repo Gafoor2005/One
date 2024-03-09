@@ -16,7 +16,7 @@ class LogOutButton extends ConsumerWidget {
     // }
     // aadOAuth.logout();
     // ref.read(routeProvider.notifier).setRoute(loggedOutRoute);
-    ref.read(authRepositoryProvider).logOut();
+    ref.read(authRepositoryProvider).logOut(ref);
   }
 
   @override
