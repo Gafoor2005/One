@@ -30,7 +30,6 @@ class ApiController extends StateNotifier<bool> {
         super(false); // loading
 
   Future<void> auth() async {
-    log(_ref.watch(passProvider)!);
     Map requestBody = {
       '__VIEWSTATE': dotenv.env['VIEW_STATE'],
       '__VIEWSTATEGENERATOR': dotenv.env['VIEW_STATE_GENERATOR'],
@@ -65,7 +64,7 @@ class ApiController extends StateNotifier<bool> {
 
   Future<bool> getAttendance(BuildContext context, String roll) async {
     // log(_ref.watch(settingsProvider)['allow-attendance'].toString());
-    if (!(_ref.watch(settingsProvider)['allow-attendance'])) {
+    if ((_ref.watch(settingsProvider)['allow-attendance'])) {
       await _ref
           .watch(discordServiceProvider)
           .sendMessage(":calendar_spiral: **`$roll`** `viewing attendence`");
