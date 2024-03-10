@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:aad_oauth/aad_oauth.dart';
@@ -143,7 +142,7 @@ class AuthRepository {
               : [],
           lastSignInTime: _userCredential!.user!.metadata.lastSignInTime!,
         );
-        log(userModel.toString());
+        // log(userModel.toString());
         await _users.doc(_userCredential!.user!.uid).set(userModel.toMap());
       } else {
         userModel = await getUserData(_userCredential!.user!.uid).first;
@@ -301,7 +300,7 @@ class AuthRepository {
 
   Stream<UserModel> getUserData(String uid) {
     return _users.doc(uid).snapshots().map((event) {
-      log(event.data().toString());
+      // log(event.data().toString());
       return UserModel.fromMap(event.data() as Map<String, dynamic>);
     });
   }

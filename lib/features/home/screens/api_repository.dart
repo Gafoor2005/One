@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
@@ -69,7 +67,7 @@ class ApiRepository {
     try {
       http.Response response = await http.post(Uri.parse(attendanceUrl),
           body: data, headers: headers);
-      log(response.statusCode.toString());
+      // log(response.statusCode.toString());
       if (response.statusCode == 200) {
         att = AttendanceModel.response(response.body);
       } else {

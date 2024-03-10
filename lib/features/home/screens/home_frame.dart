@@ -90,11 +90,15 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       logOnline();
-      final response = await http.get(Uri.parse(
-          "https://raw.githubusercontent.com/Gafoor2005/One/main/settings.json"));
-      final Map<String, dynamic> settings = jsonDecode(response.body);
-      ref.watch(settingsProvider.notifier).update((state) => settings);
-      log(response.body);
+      try {
+        final response = await http.get(Uri.parse(
+            "https://raw.githubusercontent.com/Gafoor2005/One/main/settings.json"));
+        final Map<String, dynamic> settings = jsonDecode(response.body);
+        ref.watch(settingsProvider.notifier).update((state) => settings);
+      } on Exception catch (e) {
+        // TODO
+      }
+      // log(response.body);
     });
   }
 
@@ -157,7 +161,7 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
   Widget build(BuildContext context) {
     // a();
     // Routemaster.of(context).push('/more-info');
-    aadOAuth.hasCachedAccountInformation.then((value) => log(value.toString()));
+    // aadOAuth.hasCachedAccountInformation.then((value) => log(value.toString()));
     return Scaffold(
       backgroundColor: Colors.white,
       drawerEnableOpenDragGesture: false,

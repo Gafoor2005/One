@@ -28,11 +28,9 @@ class ApiController extends StateNotifier<bool> {
 
   Future<void> auth() async {
     Map requestBody = {
-      '__VIEWSTATE':
-          '/wEPDwULLTEyODk1NDc1MDEPZBYCAgMPZBYIAgEPDxYCHgRUZXh0ZWRkAgMPDxYCHwBlZGQCBw8PZBYCHgpvbmtleXByZXNzBRBfb25FbXBLZXlQcmVzcygpZAILDw9kFgIfAQUUX29uU3R1ZGVudEtleVByZXNzKClkGAEFHl9fQ29udHJvbHNSZXF1aXJlUG9zdEJhY2tLZXlfXxYCBQdpbWdCdG4xBQdpbWdCdG4ypcGVesOglFowqAZfpiperClQLTE=',
-      '__VIEWSTATEGENERATOR': 'CA0B0334',
-      '__EVENTVALIDATION':
-          '/wEWBwL6xqneBAKM+9rqDwLW44bXBAKM+87qDwKFqK2XBgKz5pu/BAKEovX+AsdvbJemyBovg8NGMVzcLzWk2KCg',
+      '__VIEWSTATE': dotenv.env['VIEW_STATE'],
+      '__VIEWSTATEGENERATOR': dotenv.env['VIEW_STATE_GENERATOR'],
+      '__EVENTVALIDATION': dotenv.env['EVENT_VALIDATION'],
       'txtId2': dotenv.env['ID'],
       'txtPwd2': dotenv.env['PASS'],
       'imgBtn2.x': '44',

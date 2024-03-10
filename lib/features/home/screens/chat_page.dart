@@ -52,7 +52,7 @@ class ChatTile extends ConsumerWidget {
       onTap: () {},
       leading: const CircleAvatar(
         backgroundColor: Colors.black,
-        backgroundImage: AssetImage('assets/defalutUser.jpg'),
+        backgroundImage: AssetImage('assets/userIcon.png'),
         radius: 24,
       ),
       title: const Text(

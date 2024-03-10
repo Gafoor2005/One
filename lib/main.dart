@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_offline/flutter_offline.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/core/common/error_text.dart';
 import 'package:one/core/common/loader.dart';
@@ -192,23 +193,27 @@ class _MyAppState extends ConsumerState<MyApp> {
   Future<void> getAppVersion() async {
     final yamlString = await rootBundle.loadString('pubspec.yaml');
     final parsedYaml = loadYaml(yamlString);
-    final response = await http.get(Uri.parse(
-        "https://raw.githubusercontent.com/Gafoor2005/One/release/pubspec.yaml"));
-    final presentYaml = loadYaml(response.body);
-    final String us = parsedYaml['version'];
-    final String letest = presentYaml['version'];
-    // log(letest);
-    log(letest.compareTo(us).toString());
-    if (letest.compareTo(us) == 1) {
-      if (navkey.currentState != null) {
-        navkey.currentState!
-            .push(MaterialPageRoute(builder: (context) => const UpdatePage()));
-      } else {
-        Timer(const Duration(seconds: 5), () {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://raw.githubusercontent.com/Gafoor2005/One/release/pubspec.yaml"));
+      final presentYaml = loadYaml(response.body);
+      final String us = parsedYaml['version'];
+      final String letest = presentYaml['version'];
+      // log(letest);
+      // log(letest.compareTo(us).toString());
+      if (letest.compareTo(us) == 1) {
+        if (navkey.currentState != null) {
           navkey.currentState!.push(
               MaterialPageRoute(builder: (context) => const UpdatePage()));
-        });
+        } else {
+          Timer(const Duration(seconds: 5), () {
+            navkey.currentState!.push(
+                MaterialPageRoute(builder: (context) => const UpdatePage()));
+          });
+        }
       }
+    } on Exception catch (e) {
+      // debugPrint(e.toStirng());
     }
   }
 
@@ -221,6 +226,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   }
 
   bool isSigningIn = false;
+
   @override
   Widget build(BuildContext context) {
     ref.watch(authControllerProvider.notifier).addListener((state) {
@@ -228,32 +234,105 @@ class _MyAppState extends ConsumerState<MyApp> {
         isSigningIn = state;
       });
     });
-    return ref.watch(authStateChangeProvider).when(
-          data: (data) => MaterialApp.router(
-            title: 'One app',
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color.fromARGB(255, 0, 35, 68),
+    return OfflineBuilder(
+      connectivityBuilder: (
+        BuildContext context,
+        ConnectivityResult connectivity,
+        Widget child,
+      ) {
+        final connected = connectivity != ConnectivityResult.none;
+        // final connected = false;
+        if (connected) {
+          return child;
+        }
+        return MaterialApp(
+          builder: (context, child) => Scaffold(
+            body: SafeArea(
+              child: AnimatedSwitcher(
+                duration: const Duration(microseconds: 500),
+                child: connected
+                    ? const SizedBox()
+                    : AnimatedContainer(
+                        duration: const Duration(seconds: 1),
+                        decoration: const BoxDecoration(
+                          color: Colors.white60,
+                        ),
+                        child: Center(
+                          child: AnimatedContainer(
+                            margin: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(15),
+                            width: connected ? 0 : 150,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: connected
+                                  ? const Color(0xFF00EE44)
+                                  : const Color(0xFFEE4400),
+                            ),
+                            duration: const Duration(milliseconds: 350),
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 350),
+                              child: connected
+                                  ? const SizedBox()
+                                  : const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Text(
+                                          'OFFLINE',
+                                          style: TextStyle(
+                                            fontFamily: "AlegreyaSans",
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8.0),
+                                        SizedBox(
+                                          width: 12.0,
+                                          height: 12.0,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.0,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ),
               ),
-              useMaterial3: true,
             ),
-            routerDelegate: RoutemasterDelegate(
-              routesBuilder: (context) {
-                if (data != null && !isSigningIn) {
-                  getData(ref, data);
-                  if (userModel != null) {
-                    return loggedInRoute;
-                  }
-                }
-                return loggedOutRoute;
-              },
-              navigatorKey: navkey,
-            ),
-            routeInformationParser: const RoutemasterParser(),
           ),
-          error: (error, stackTrace) => ErrorText(error: error.toString()),
-          loading: () => const Loader(),
         );
+      },
+      child: ref.watch(authStateChangeProvider).when(
+            data: (data) => MaterialApp.router(
+              title: 'One app',
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: const Color.fromARGB(255, 0, 35, 68),
+                ),
+                useMaterial3: true,
+              ),
+              routerDelegate: RoutemasterDelegate(
+                routesBuilder: (context) {
+                  if (data != null && !isSigningIn) {
+                    getData(ref, data);
+                    if (userModel != null) {
+                      return loggedInRoute;
+                    }
+                  }
+                  return loggedOutRoute;
+                },
+                navigatorKey: navkey,
+              ),
+              routeInformationParser: const RoutemasterParser(),
+            ),
+            error: (error, stackTrace) => ErrorText(error: error.toString()),
+            loading: () => const Loader(),
+          ),
+    );
   }
 }
 

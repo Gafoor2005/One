@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
@@ -38,7 +36,7 @@ class _SetDisplayNameState extends ConsumerState<SetDisplayName> {
     final mytext = t.text;
 
     t.clear();
-    log("tap");
+    // log("tap");
     ref.watch(authControllerProvider.notifier).setDisplayName(mytext);
     Routemaster.of(context).pop();
   }

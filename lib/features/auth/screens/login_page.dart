@@ -1,11 +1,8 @@
-import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/core/common/loader.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
-import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:one/features/auth/widgets/large_button.dart';
 
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
@@ -32,8 +29,8 @@ class LoginPage extends ConsumerWidget {
     // ref.watch(attendanceProvider.notifier).update((state) => null);
     // ref.watch(bioProvider.notifier).update((state) => null);
 
-    aadOAuth.hasCachedAccountInformation
-        .then((value) => log("aad cache: ${value.toString()}"));
+    // aadOAuth.hasCachedAccountInformation
+    //     .then((value) => log("aad cache: ${value.toString()}"));
     return Builder(builder: (context) {
       return Scaffold(
         backgroundColor: Colors.white,
