@@ -23,6 +23,7 @@ import 'package:routemaster/routemaster.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:yaml/yaml.dart';
 import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' as parser;
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
@@ -194,12 +195,22 @@ class _MyAppState extends ConsumerState<MyApp> {
     final yamlString = await rootBundle.loadString('pubspec.yaml');
     final parsedYaml = loadYaml(yamlString);
     try {
-      final response = await http.get(Uri.parse(
-          "https://raw.githubusercontent.com/Gafoor2005/One/release/pubspec.yaml"));
-      final presentYaml = loadYaml(response.body);
-      final String us = parsedYaml['version'];
-      final String letest = presentYaml['version'];
+      final response = await http
+          .get(Uri.parse("https://github.com/Gafoor2005/One/releases/latest"));
+      // log(response.body.toString());
+      var document = parser.parse(response.body);
+      String letest = document
+          .querySelector(
+              '#repo-content-pjax-container > div > nav > ol > li.breadcrumb-item.breadcrumb-item-selected > a')!
+          .innerHtml;
+      letest = letest.split('v')[1].trim();
       // log(letest);
+      // log(letest.length.toString());
+      String us = parsedYaml['version'];
+      us = us.split('+')[0];
+      // // final String letest = presentYaml['version'];
+      // log(us);
+      // log(us.length.toString());
       // log(letest.compareTo(us).toString());
       if (letest.compareTo(us) == 1) {
         if (navkey.currentState != null) {
