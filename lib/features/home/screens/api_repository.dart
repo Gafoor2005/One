@@ -72,8 +72,8 @@ class ApiRepository {
         att = AttendanceModel.response(response.body);
       } else {
         // log('error bio! status code:', error: response.statusCode);
-        return left(
-            Failure("cannot get bio.\nstatus code:${response.statusCode}"));
+        return left(Failure(
+            "cannot get attendance.\nstatus code:${response.statusCode}"));
       }
       return right(att);
     } catch (e) {

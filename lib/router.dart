@@ -5,6 +5,7 @@ import 'package:one/features/home/screens/add_news.dart';
 import 'package:one/features/home/screens/chat_page.dart';
 import 'package:one/features/home/screens/home_frame.dart';
 import 'package:one/features/home/screens/set_displayname.dart';
+import 'package:one/features/home/screens/set_pass.dart';
 import 'package:one/features/posts/screens/post_details.dart';
 import 'package:one/features/posts/screens/post_page.dart';
 import 'package:one/features/posts/screens/upload_file.dart';
@@ -25,6 +26,7 @@ final loggedOutRoute = RouteMap(routes: {
 
 final loggedInRoute = RouteMap(routes: {
   '/': (_) => const MaterialPage(child: HomeFrame()),
+  '/set-pass': (_) => const MaterialPage(child: SetPassword()),
   '/set-displayname': (_) => const MaterialPage(child: SetDisplayName()),
   '/demo': (_) => const MaterialPage(child: DemoPage()),
   '/attendance': (_) => const MaterialPage(child: AttendancePage()),

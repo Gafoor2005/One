@@ -85,7 +85,7 @@ class AccountPage extends StatelessWidget {
                           ),
                           title: const Text("attendance"),
                           onTap: () {
-                            Routemaster.of(context).push("/attendance");
+                            Routemaster.of(context).push("/set-pass");
                           },
                           trailing: const Icon(Icons.navigate_next_rounded),
                         ),

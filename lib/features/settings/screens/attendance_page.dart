@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/home/screens/api_controller.dart';
+import 'package:routemaster/routemaster.dart';
 
 class AttendanceModel {
   final String rollNO;
