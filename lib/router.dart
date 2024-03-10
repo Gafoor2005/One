@@ -13,6 +13,7 @@ import 'package:one/features/settings/screens/attendance_page.dart';
 import 'package:one/features/settings/screens/bio_page.dart';
 import 'package:one/notif.dart';
 import 'package:one/offline_test.dart';
+import 'package:one/policy.dart';
 import 'package:routemaster/routemaster.dart';
 
 final waitingRoute = RouteMap(routes: {
@@ -20,6 +21,7 @@ final waitingRoute = RouteMap(routes: {
 });
 final loggedOutRoute = RouteMap(routes: {
   '/': (_) => const MaterialPage(child: LoginPage()),
+  '/policy': (_) => const MaterialPage(child: PolicyPage()),
   '/more-info': (_) => const MaterialPage(child: NeedMoreInfo()),
   '/notif': (r) => const MaterialPage(child: Notif()),
 });

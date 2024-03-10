@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/core/common/loader.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/auth/widgets/large_button.dart';
+import 'package:routemaster/routemaster.dart';
 
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
   return FirebaseAuth.instance;
 });
+final acceptedPolicyProvider = StateProvider<bool>((ref) => false);
 
 // FirebaseAuth firebaseAuth =
 class LoginPage extends ConsumerWidget {
@@ -18,8 +20,11 @@ class LoginPage extends ConsumerWidget {
     // ref.read(authControllerProvider.notifier).signInWithMicrosoft(context);
 
     // firebaseAuth.tenantId = "df7217c9-cec8-4cc2-8e6a-a1cfbfadb321";
-
-    ref.read(authControllerProvider.notifier).signInWithMS(context);
+    if (ref.watch(acceptedPolicyProvider)) {
+      ref.read(authControllerProvider.notifier).signInWithMS(context);
+    } else {
+      Routemaster.of(context).push("/policy");
+    }
   }
 
   @override
