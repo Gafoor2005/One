@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/core/models/elective_form_model.dart';
 import 'package:one/core/models/elective_model.dart';
@@ -11,6 +13,8 @@ import 'package:one/core/utils.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/home/screens/forms_repository.dart';
 import 'package:uuid/uuid.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 import 'my_ids.dart';
 
@@ -128,6 +132,7 @@ class FormsController extends StateNotifier<bool> {
   }) async {
     state = true;
     int message = 0;
+
     // String electiveId = const Uuid().v1();
     final FormResponse response = FormResponse(
       rollNumber: _ref.watch(userProvider)!.rollNO,
@@ -138,14 +143,44 @@ class FormsController extends StateNotifier<bool> {
     state = false;
     res.fold(
       (l) => showSnackBar(context, l.message),
-      (r) {
-        message = 1;
+      (r) async {
         showSnackBar(context, 'response submitted successfully!');
+        message = await addToSheet(formId, courseId);
         // Routemaster.of(context).pop();
       },
     );
 
     return message;
+  }
+
+  Future<int> addToSheet(String formId, String courseId) async {
+    final user = _ref.read(userProvider)!;
+    try {
+      String url = dotenv.env['APP_SCRIPT_URL']!;
+      var data = json.encode({
+        "fileName": formId,
+        "sheetName": courseId,
+        "name": user.name,
+        "rollNumber": user.rollNO,
+        "email": user.email,
+        "branch": "CSE",
+        "phone": user.phoneNo,
+        "timestamp": DateFormat.yMd().add_jms().format(DateTime.now()),
+      });
+      http.Response response = await http.post(Uri.parse(url),
+          body: data, headers: {"Content-Type": "application/json"});
+
+      if (response.statusCode == 302 || response.statusCode == 200) {
+        // att = AttendanceModel.response(response.body);
+        // log(response.body.toString());
+        return 1;
+      } else {
+        // log('error bio! status code:', error: response.statusCode);
+        return 0;
+      }
+    } catch (e) {
+      return 0;
+    }
   }
 
   Future<String> addElective({

@@ -38,18 +38,18 @@ class _FormPageState extends ConsumerState<FormPage> {
       showModalBottomSheet(
         context: context,
         builder: (context) {
-          return const SizedBox(
+          return SizedBox(
             width: double.infinity,
             height: 500,
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  FaIcon(FontAwesomeIcons.circleCheck),
-                  SizedBox(
+                  const FaIcon(FontAwesomeIcons.circleCheck),
+                  const SizedBox(
                     height: 10,
                   ),
-                  Text("response submitted successfully"),
+                  Text("$value response submitted successfully"),
                 ],
               ),
             ),
