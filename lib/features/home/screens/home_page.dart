@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one/core/common/error_text.dart';
+import 'package:one/core/common/loader.dart';
+import 'package:one/features/home/screens/forms_controller.dart';
 import 'package:one/features/home/screens/news.dart';
 import 'package:one/features/home/screens/news_controller.dart';
+import 'package:routemaster/routemaster.dart';
 
 Map<String, String> headers = {
   'Accept':
@@ -191,6 +195,102 @@ class HomePage extends ConsumerWidget {
                     ],
                   ),
                 ),
+                const SideTitle(titleText: 'Forms'),
+                SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 21),
+                  clipBehavior: Clip.none,
+                  scrollDirection: Axis.horizontal,
+                  child: ref.watch(formsProvider).when(
+                        data: (forms) => Row(
+                          children: forms
+                              .map(
+                                (form) => GestureDetector(
+                                  onTap: () => Routemaster.of(context)
+                                      .push("/form/${form.id}"),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(19),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(17),
+                                      // color: Color.fromRGBO(208, 208, 208, 0.39),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSecondary,
+                                      // color: Colors.white,
+                                      // border: Border.all(
+                                      //     color: Colors.greenAccent,
+                                      //     ),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          blurRadius: 3,
+                                          spreadRadius: -1,
+                                          color: Colors.black38,
+                                        )
+                                      ],
+                                    ),
+                                    clipBehavior: Clip.none,
+                                    margin: const EdgeInsets.only(
+                                      right: 10,
+                                      bottom: 10,
+                                    ),
+                                    width: 300,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          height: 16 * 1,
+                                          child: Text(
+                                            form.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontFamily: 'NotoSans',
+                                              fontWeight: FontWeight.w800,
+                                              // fontSize: 16,
+                                              height: 1,
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          form.description,
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontFamily: 'NotoSans',
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 13,
+                                            height: 1.4,
+                                            // color: Colors.black54,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 6,
+                                        ),
+                                        Text(
+                                          "${form.electiveId} | ${form.regulationId} | ${form.batch}-${form.batch + 4}",
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium!
+                                              .copyWith(
+                                                fontFamily: 'NotoSans',
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.grey.shade700,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                        error: (error, stackTrace) => Text(error.toString()),
+                        loading: () => const Loader(),
+                      ),
+                ),
+
                 // const Text("data"),
                 // ref.watch(bioProvider) == null
                 //     ? ElevatedButton(
@@ -599,15 +699,18 @@ class NewsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontFamily: 'AlegreyaSans',
-              fontWeight: FontWeight.w800,
-              fontSize: 16,
-              height: 1,
+          SizedBox(
+            height: 16 * 1,
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'AlegreyaSans',
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                height: 1,
+              ),
             ),
           ),
           const SizedBox(

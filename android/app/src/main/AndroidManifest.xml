@@ -26,6 +26,21 @@
       <intent-filter>
         <action android:name="com.google.firebase.MESSAGING_EVENT" />
       </intent-filter>
+
+      <!-- Make sure you explicitly set android:autoVerify to "true". -->
+      <intent-filter android:autoVerify="true">
+          <action android:name="android.intent.action.VIEW" />
+          <category android:name="android.intent.category.DEFAULT" />
+          <category android:name="android.intent.category.BROWSABLE" />
+
+          <!-- If a user clicks on a shared link that uses the "http" scheme, your
+              app should be able to delegate that traffic to "https". -->
+          <data android:scheme="http" />
+          <data android:scheme="https" />
+
+          <!-- Include one or more domains that should be verified. -->
+          <data android:host="devloopers.me" />
+      </intent-filter>
         
     </activity>
     <!-- Don't delete the meta-data below.
@@ -41,12 +56,12 @@
 
   <uses-permission android:name="android.permission.INTERNET"/>
   <!-- Provide required visibility configuration for API level 30 and above -->
-<queries>
-  
-  <!-- If your application checks for inAppBrowserView launch mode support -->
-  <intent>
-    <action android:name="android.support.customtabs.action.CustomTabsService" />
-  </intent>
-</queries>
+  <queries>
+    
+    <!-- If your application checks for inAppBrowserView launch mode support -->
+    <intent>
+      <action android:name="android.support.customtabs.action.CustomTabsService" />
+    </intent>
+  </queries>
 </manifest>
 

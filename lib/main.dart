@@ -128,24 +128,28 @@ void showFlutterNotification(RemoteMessage message) {
 late bool loginStatus;
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
+class Environment {
+  static const String clientId = String.fromEnvironment('clientId');
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await dotenv.load(fileName: ".env");
-  loginStatus = await aadOAuth.hasCachedAccountInformation;
+  if (!kIsWeb) {
+    await dotenv.load(fileName: ".env");
+  } else {}
+  // loginStatus = await aadOAuth.hasCachedAccountInformation;
   // log('message');
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
   if (!kIsWeb) {
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     await setupFlutterNotifications();
   }
 
@@ -177,16 +181,25 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   UserModel? userModel;
 
-  void getData(WidgetRef ref, User data) async {
-    if (ref.watch(userProvider) == null) {
-      userModel = await ref
-          .watch(authControllerProvider.notifier)
-          .getUserData(data.uid)
-          .first;
-      ref.read(userProvider.notifier).update((state) => userModel);
-      setState(() {});
-    } else {
-      userModel = ref.read(userProvider);
+  Future<void> getData(WidgetRef ref, User data, BuildContext context) async {
+    try {
+      if (ref.watch(userProvider) == null) {
+        final a = await ref
+            .watch(authRepositoryProvider)
+            .getCurrentUserData(data.uid);
+        if (a == null) {
+          log("Account not found > logging out");
+          await ref.watch(authControllerProvider.notifier).logout(ref);
+        } else {
+          userModel = await a.first;
+        }
+        ref.read(userProvider.notifier).update((state) => userModel);
+        // setState(() {});
+      } else {
+        userModel = ref.read(userProvider);
+      }
+    } on Exception catch (e) {
+      log(e.toString());
     }
   }
 
@@ -224,7 +237,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         }
       }
     } on Exception catch (e) {
-      // debugPrint(e.toStirng());
+      log(e.toString());
     }
   }
 
@@ -329,7 +342,7 @@ class _MyAppState extends ConsumerState<MyApp> {
               routerDelegate: RoutemasterDelegate(
                 routesBuilder: (context) {
                   if (data != null && !isSigningIn) {
-                    getData(ref, data);
+                    getData(ref, data, context);
                     if (userModel != null) {
                       return loggedInRoute;
                     }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +20,8 @@ class LoginPage extends ConsumerWidget {
   /// ### this handles signin and navigation to hame page if success
   void signInWithMicrosoft(BuildContext context, WidgetRef ref) async {
     // ref.read(authControllerProvider.notifier).signInWithMicrosoft(context);
+    ref.watch(userProvider.notifier).update((state) => null);
+    log(ref.watch(userProvider).toString());
 
     // firebaseAuth.tenantId = "df7217c9-cec8-4cc2-8e6a-a1cfbfadb321";
     if (ref.watch(acceptedPolicyProvider)) {

@@ -47,47 +47,47 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
   void initState() {
     super.initState();
 
-    FirebaseMessaging.instance.getInitialMessage().then(
-          (message) => setState(
-            () {
-              if (message == null) return;
-              _resolved = true;
-              initialMessage = message.data.toString();
-              // ref.read(messageArgumentsProvider.notifier).update((state) =>
-              //     MessageArguments(message: message, openedApplication: true));
-              // Routemaster.of(context).push('/notif');
-              final data = NotifPayload.fromMap(message.data);
-              Routemaster.of(context).push('post/${data.pid}');
-            },
-          ),
-        );
+    // FirebaseMessaging.instance.getInitialMessage().then(
+    //       (message) => setState(
+    //         () {
+    //           if (message == null) return;
+    //           _resolved = true;
+    //           initialMessage = message.data.toString();
+    //           // ref.read(messageArgumentsProvider.notifier).update((state) =>
+    //           //     MessageArguments(message: message, openedApplication: true));
+    //           // Routemaster.of(context).push('/notif');
+    //           final data = NotifPayload.fromMap(message.data);
+    //           Routemaster.of(context).push('post/${data.pid}');
+    //         },
+    //       ),
+    //     );
 
-    FirebaseMessaging.instance
-        .getToken()
-        .then((value) => log(value.toString()));
-    FirebaseMessaging.onMessage.listen((message) {
-      // showFlutterNotification(message);
-      log('new message reciveed in foreground');
-    });
+    // FirebaseMessaging.instance
+    //     .getToken()
+    //     .then((value) => log(value.toString()));
+    // FirebaseMessaging.onMessage.listen((message) {
+    //   // showFlutterNotification(message);
+    //   log('new message reciveed in foreground');
+    // });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      log('A new onMessageOpenedApp event was published!');
-      // Navigator.pushNamed(
-      //   context,
-      //   '/message',
-      //   arguments: MessageArguments(message, true),
-      // );
-      log("message : ${message.data}");
-      // ref
-      //     .read(messageArgumentsProvider.notifier)
-      //     .update((state) => MessageArguments(
-      //           message: message,
-      //           openedApplication: true,
-      //         ));
-      // Routemaster.of(context).push('/notif');
-      final data = NotifPayload.fromMap(message.data);
-      Routemaster.of(context).push('post/${data.pid}');
-    });
+    // FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    //   log('A new onMessageOpenedApp event was published!');
+    //   // Navigator.pushNamed(
+    //   //   context,
+    //   //   '/message',
+    //   //   arguments: MessageArguments(message, true),
+    //   // );
+    //   log("message : ${message.data}");
+    //   // ref
+    //   //     .read(messageArgumentsProvider.notifier)
+    //   //     .update((state) => MessageArguments(
+    //   //           message: message,
+    //   //           openedApplication: true,
+    //   //         ));
+    //   // Routemaster.of(context).push('/notif');
+    //   final data = NotifPayload.fromMap(message.data);
+    //   Routemaster.of(context).push('post/${data.pid}');
+    // });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       logOnline();
       try {
@@ -200,6 +200,26 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
                       style: TextStyle(fontFamily: "AlegreyaSans"),
                     ),
                     leading: const Icon(Icons.event),
+                  ),
+                  ListTile(
+                    onTap: () {
+                      Routemaster.of(context).push('/regulations');
+                    },
+                    title: const Text(
+                      'Regulations',
+                      style: TextStyle(fontFamily: "AlegreyaSans"),
+                    ),
+                    leading: const Icon(Icons.insert_drive_file_outlined),
+                  ),
+                  ListTile(
+                    onTap: () {
+                      Routemaster.of(context).push('/create-form');
+                    },
+                    title: const Text(
+                      'create form',
+                      style: TextStyle(fontFamily: "AlegreyaSans"),
+                    ),
+                    leading: const Icon(Icons.post_add_rounded),
                   ),
                   const ListTile(
                     title: Text('clubs'),

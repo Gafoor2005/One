@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:aad_oauth/aad_oauth.dart';
+// import 'package:aad_oauth/aad_oauth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +18,7 @@ final authControllerProvider = StateNotifierProvider<AuthController, bool>(
   (ref) => AuthController(
     authRepository: ref.watch(authRepositoryProvider),
     ref: ref,
-    aadOAuth: aadOAuth,
+    // aadOAuth: aadOAuth,
   ),
 );
 
@@ -41,7 +41,7 @@ class AuthController extends StateNotifier<bool> {
   AuthController({
     required AuthRepository authRepository,
     required Ref ref,
-    required AadOAuth aadOAuth,
+    // required AadOAuth aadOAuth,
   })  : _authRepository = authRepository,
         _ref = ref,
         super(false); // loading
@@ -64,11 +64,11 @@ class AuthController extends StateNotifier<bool> {
             .sendMessage(":lock: **`${user.rollNO}`** `signed in`");
         _ref.read(userProvider.notifier).update((state) => user);
         // log("from controller ${user.toString()}");
-        if (user.roles != null) {
-          for (String topic in user.roles!) {
-            FirebaseMessaging.instance.subscribeToTopic(topic);
-          }
-        }
+        // if (user.roles != null) {
+        //   for (String topic in user.roles!) {
+        //     FirebaseMessaging.instance.subscribeToTopic(topic);
+        //   }
+        // }
         loginStatus = true;
         state = false; // stopped loader
       },
@@ -87,7 +87,7 @@ class AuthController extends StateNotifier<bool> {
     return _authRepository.getCurrentUserDataFromMs(accessToken);
   }
 
-  Stream<UserModel> getUserData(String uid) {
+  Stream<UserModel?> getUserData(String uid) {
     return _authRepository.getUserData(uid);
   }
 
@@ -95,7 +95,7 @@ class AuthController extends StateNotifier<bool> {
     return _authRepository.getMsUserData(uid);
   }
 
-  void logout(WidgetRef ref) async {
+  Future<void> logout(WidgetRef ref) async {
     _authRepository.logOut(ref);
   }
 }

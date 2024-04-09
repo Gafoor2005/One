@@ -132,7 +132,7 @@ class _NotifState extends ConsumerState<Notif> {
   late UserModel sender;
   void getSenderInfo(NotifPayload payload) {
     ref.watch(getUserDataProvider(payload.uid)).whenData((data) {
-      sender = data;
+      sender = data!;
       print('watched $sender');
       if (isLoading) {
         isLoading = false;

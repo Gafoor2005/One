@@ -1,15 +1,15 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
-import 'package:aad_oauth/aad_oauth.dart';
-import 'package:aad_oauth/model/config.dart';
+// import 'package:aad_oauth/aad_oauth.dart';
+// import 'package:aad_oauth/model/config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:one/bot.dart';
 import 'package:one/core/failuer.dart';
 import 'package:one/core/models/ms_user_model.dart';
@@ -20,49 +20,49 @@ import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/home/screens/api_controller.dart';
 import 'package:one/features/posts/screens/post_page.dart';
 import 'package:one/features/settings/screens/attendance_page.dart';
-import 'package:one/main.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-final Config _config = Config(
-  tenant: dotenv.env['TENANT']!,
-  clientId: dotenv.env['CLIENT_ID']!,
-  scope:
-      "User.ReadBasic.All User.Read openid profile offline_access Files.Read.All",
-  // redirectUri is Optional as a default is calculated based on app type/web location
-  redirectUri: "https://login.live.com/oauth20_desktop.srf",
-  navigatorKey: navkey,
-  // webUseRedirect:
-  //     true, // default is false - on web only, forces a redirect flow instead of popup auth
-  //Optional parameter: Centered CircularProgressIndicator while rendering web page in WebView
-  loader: const Center(child: CircularProgressIndicator()),
-);
+// final Config _config = Config(
+//   tenant: dotenv.env['TENANT']!,
+//   clientId: dotenv.env['CLIENT_ID']!,
+//   scope:
+//       "User.ReadBasic.All User.Read openid profile offline_access Files.Read.All",
+//   // redirectUri is Optional as a default is calculated based on app type/web location
+//   redirectUri: "https://login.live.com/oauth20_desktop.srf",
+//   navigatorKey: navkey,
+//   // webUseRedirect:
+//   //     true, // default is false - on web only, forces a redirect flow instead of popup auth
+//   //Optional parameter: Centered CircularProgressIndicator while rendering web page in WebView
+//   loader: const Center(child: CircularProgressIndicator()),
+// );
 
-final AadOAuth aadOAuth = AadOAuth(_config);
+// final AadOAuth aadOAuth = AadOAuth(_config);
 
 final authRepositoryProvider = Provider(
   (ref) => AuthRepository(
     auth: ref.read(authProvider),
     firestore: ref.read(storageProvider),
-    googleSignIn: ref.read(googleSignInProvider),
-    aadOAuth: aadOAuth,
+    // googleSignIn: ref.read(googleSignInProvider),
+    // aadOAuth: aadOAuth,
   ),
 );
 
 class AuthRepository {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
-  final GoogleSignIn _googleSignIn;
-  final AadOAuth _aadOAuth;
+  // final GoogleSignIn _googleSignIn;
+  // final AadOAuth _aadOAuth;
   AuthRepository({
     required FirebaseAuth auth,
     required FirebaseFirestore firestore,
-    required GoogleSignIn googleSignIn,
-    required AadOAuth aadOAuth,
+    // required GoogleSignIn googleSignIn,
+    // required AadOAuth aadOAuth,
   })  : _auth = auth,
-        _firestore = firestore,
-        _googleSignIn = googleSignIn,
-        _aadOAuth = aadOAuth;
+        _firestore = firestore
+  // _googleSignIn = googleSignIn
+  // _aadOAuth = aadOAuth
+  ;
   UserCredential? _userCredential;
 
   Stream<User?> get authStateChange => _auth.authStateChanges();
@@ -83,7 +83,11 @@ class AuthRepository {
         // "login_hint": "abc@def.gh"
         // "domain_hint": "example.com"
       });
-      _userCredential = await _auth.signInWithProvider(msAuthProvider);
+      if (kIsWeb) {
+        _userCredential = await _auth.signInWithPopup(msAuthProvider);
+      } else {
+        _userCredential = await _auth.signInWithProvider(msAuthProvider);
+      }
 
       // getCurrentUserDataFromMs(userCredential.credential!.accessToken ?? '');
       UserModel userModel;
@@ -91,61 +95,16 @@ class AuthRepository {
       // log(_userCredential!.toString());
 
       if (_userCredential!.additionalUserInfo!.isNewUser) {
-        String photoUrl = dotenv.env['PROFILE_ICON_URL']!;
-
-        final response = await http.get(
-          Uri.parse('https://graph.microsoft.com/v1.0/me/photo/\$value'),
-          headers: {
-            'Authorization':
-                'Bearer ${_userCredential!.credential!.accessToken}',
-            'Content-Type': 'application/json',
-          },
-        );
-        if (response.statusCode == 200) {
-          final file = await createTempFileFromPostRequestBody(response);
-          // log(file.path);
-          final storageRef = FirebaseStorage.instance
-              .ref()
-              .child('profilePictures/${_userCredential!.user!.uid}');
-
-          try {
-            //Store the file
-            await storageRef.putFile(File(file.path));
-            //Success: get the download URL
-            photoUrl = await storageRef.getDownloadURL();
-          } catch (error) {
-            // log(error.toString());
-            rethrow;
-          }
-        }
-        final String fullName =
-            _userCredential!.additionalUserInfo!.profile!['givenName'] +
-                " " +
-                _userCredential!.additionalUserInfo!.profile!['surname'];
-        var theName = [];
-        fullName.split(" ").forEach((e) {
-          theName.add(e.capitalize());
-        });
-        userModel = UserModel(
-          name: theName.join(" "),
-          email: _userCredential!.additionalUserInfo!.profile!['mail'] ??
-              "notfound@email.com",
-          profilePic: photoUrl,
-          uid: _userCredential!.user!.uid,
-          oid: _userCredential!.additionalUserInfo!.profile!['id'],
-          phoneNo: _userCredential!.additionalUserInfo!.profile!['mobilePhone'],
-          rollNO: _userCredential!.additionalUserInfo!.profile!['mail']!
-              .split('@')[0],
-          roles: (_userCredential!.additionalUserInfo!.profile!['jobTitle'] !=
-                  'null')
-              ? [_userCredential!.additionalUserInfo!.profile!['jobTitle']]
-              : [],
-          lastSignInTime: _userCredential!.user!.metadata.lastSignInTime!,
-        );
-        // log(userModel.toString());
-        await _users.doc(_userCredential!.user!.uid).set(userModel.toMap());
+        userModel = await createAccountForDB();
       } else {
-        userModel = await getUserData(_userCredential!.user!.uid).first;
+        var userInDB = await getCurrentUserData(_userCredential!.user!.uid);
+        if (userInDB != null) {
+          userModel = await userInDB.first;
+        } else {
+          log("account not found in DB");
+          userModel = await createAccountForDB();
+        }
+        // log(userModel.toString());
       }
       // _firestore
       //     .collectionGroup("registered")
@@ -158,6 +117,7 @@ class AuthRepository {
       //   }
       // });
       // log(_auth.authStateChanges().first.toString());
+      // log(_userCredential!.additionalUserInfo.toString());
       return right(userModel);
     } on FirebaseException catch (e) {
       // log(e.message.toString());
@@ -168,44 +128,101 @@ class AuthRepository {
     }
   }
 
-  FutureEither<UserModel> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      final googelAuth = await googleUser?.authentication;
+  Future<UserModel> createAccountForDB() async {
+    log("New user");
+    String photoUrl = dotenv.env['PROFILE_ICON_URL']!;
 
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googelAuth?.accessToken,
-        idToken: googelAuth?.idToken,
-      );
+    final response = await http.get(
+      Uri.parse('https://graph.microsoft.com/v1.0/me/photo/\$value'),
+      headers: {
+        'Authorization': 'Bearer ${_userCredential!.credential!.accessToken}',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200) {
+      final file = await createTempFileFromPostRequestBody(response);
+      // log(file.path);
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profilePictures/${_userCredential!.user!.uid}');
 
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
-
-      UserModel userModel;
-      // log(userCredential.additionalUserInfo.toString());
-      if (userCredential.additionalUserInfo!.isNewUser) {
-        userModel = UserModel(
-          oid: '',
-          phoneNo: 'xyz',
-          lastSignInTime: DateTime(00),
-          name: userCredential.user!.displayName ?? "no name",
-          email: userCredential.user!.email ?? "notfound@email.com",
-          profilePic: userCredential.user!.photoURL ?? 'assets/defaultUser.jpg',
-          uid: userCredential.user!.uid,
-          rollNO: "rollno",
-        );
-        // print(userCredential.user!.email.toString());
-        await _users.doc(userCredential.user!.uid).set(userModel.toMap());
-      } else {
-        userModel = await getUserData(userCredential.user!.uid).first;
+      try {
+        //Store the file
+        await storageRef.putFile(File(file.path));
+        //Success: get the download URL
+        photoUrl = await storageRef.getDownloadURL();
+      } catch (error) {
+        // log(error.toString());
+        rethrow;
       }
-      return right(userModel);
-    } on FirebaseException catch (e) {
-      return left(Failure(e.message.toString()));
-    } catch (e) {
-      return left(Failure(e.toString()));
     }
+    final String fullName =
+        _userCredential!.additionalUserInfo!.profile!['givenName'] +
+            " " +
+            _userCredential!.additionalUserInfo!.profile!['surname'];
+    var theName = [];
+    fullName.split(" ").forEach((e) {
+      theName.add(e.capitalize());
+    });
+    UserModel userModel = UserModel(
+      name: theName.join(" "),
+      email: _userCredential!.additionalUserInfo!.profile!['mail'] ??
+          "notfound@email.com",
+      profilePic: photoUrl,
+      uid: _userCredential!.user!.uid,
+      oid: _userCredential!.additionalUserInfo!.profile!['id'],
+      phoneNo: _userCredential!.additionalUserInfo!.profile!['mobilePhone'],
+      rollNO:
+          _userCredential!.additionalUserInfo!.profile!['mail']!.split('@')[0],
+      roles:
+          (_userCredential!.additionalUserInfo!.profile!['jobTitle'] != 'null')
+              ? [_userCredential!.additionalUserInfo!.profile!['jobTitle']]
+              : [],
+      lastSignInTime: _userCredential!.user!.metadata.lastSignInTime!,
+    );
+    // log(userModel.toString());
+    await _users.doc(_userCredential!.user!.uid).set(userModel.toMap());
+    return userModel;
   }
+
+  // FutureEither<UserModel> signInWithGoogle() async {
+  //   try {
+  //     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+  //     final googelAuth = await googleUser?.authentication;
+
+  //     final credential = GoogleAuthProvider.credential(
+  //       accessToken: googelAuth?.accessToken,
+  //       idToken: googelAuth?.idToken,
+  //     );
+
+  //     UserCredential userCredential =
+  //         await _auth.signInWithCredential(credential);
+
+  //     UserModel userModel;
+  //     // log(userCredential.additionalUserInfo.toString());
+  //     if (userCredential.additionalUserInfo!.isNewUser) {
+  //       userModel = UserModel(
+  //         oid: '',
+  //         phoneNo: 'xyz',
+  //         lastSignInTime: DateTime(00),
+  //         name: userCredential.user!.displayName ?? "no name",
+  //         email: userCredential.user!.email ?? "notfound@email.com",
+  //         profilePic: userCredential.user!.photoURL ?? 'assets/defaultUser.jpg',
+  //         uid: userCredential.user!.uid,
+  //         rollNO: "rollno",
+  //       );
+  //       // print(userCredential.user!.email.toString());
+  //       await _users.doc(userCredential.user!.uid).set(userModel.toMap());
+  //     } else {
+  //       // userModel = await getUserData(userCredential.user!.uid).first;
+  //     }
+  //     // return right(userModel!);
+  //   } on FirebaseException catch (e) {
+  //     return left(Failure(e.message.toString()));
+  //   } catch (e) {
+  //     return left(Failure(e.toString()));
+  //   }
+  // }
 
   Future<MsUserModel> getCurrentUserDataFromMs(String accessToken) async {
     final response = await http.get(
@@ -298,21 +315,37 @@ class AuthRepository {
         (event) => MsUserModel.fromMap(event.data() as Map<String, dynamic>));
   }
 
-  Stream<UserModel> getUserData(String uid) {
+  Stream<UserModel?> getUserData(String uid) {
     return _users.doc(uid).snapshots().map((event) {
-      // log(event.data().toString());
       return UserModel.fromMap(event.data() as Map<String, dynamic>);
     });
   }
 
-  void logOut(WidgetRef ref) async {
-    await ref.watch(discordServiceProvider).sendMessage(
-        ":red_square: **`${ref.watch(userProvider)!.rollNO}`** `logged out`");
+  Future<Stream<UserModel>?> getCurrentUserData(String uid) async {
+    final u = await _users.doc(uid).get();
+    if (u.exists) {
+      return _users.doc(uid).snapshots().map((event) {
+        return UserModel.fromMap(event.data() as Map<String, dynamic>);
+      });
+    }
+    return null;
+  }
+
+  Future<void> logOut(WidgetRef ref) async {
+    if (ref.watch(userProvider) == null) {
+      await ref.watch(discordServiceProvider).sendMessage(
+          ":red_square: **`${_auth.currentUser!.uid}`** `Account Not Found logged out`");
+    } else {
+      await ref.watch(discordServiceProvider).sendMessage(
+          ":red_square: **`${ref.watch(userProvider)!.rollNO}`** `logged out`");
+    }
+
     ref.watch(userProvider.notifier).update((state) => null);
     ref.watch(attendanceProvider.notifier).update((state) => null);
     ref.watch(bioProvider.notifier).update((state) => null);
-    await _aadOAuth.logout();
-    await _googleSignIn.signOut();
+    // log(ref.watch(userProvider).toString() + "signing out");
     await _auth.signOut();
+    // await _aadOAuth.logout();
+    // await _googleSignIn.signOut();
   }
 }

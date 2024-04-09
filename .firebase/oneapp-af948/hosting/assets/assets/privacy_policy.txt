@@ -1,0 +1,13 @@
+OneApp and its developer take your privacy very seriously. OneApp does not sell or rent your data, and anonymous information is only collected to help make the app better.
+
+When signing into OneApp, it requests specific permissions from your Microsoft account, such as the ability to read user profile. This is very simply because in order for OneApp to do anything — something as simple as viewing study material in library when you tap the library button — Microsoft (rightly) requests that you give the client the ability to do these things. OneApp never performs any actions without you clearly requesting it to (such as by tapping a button). This is very simply required in order for the app to function whatsoever.
+
+OneApp (obviously) uses the Microsoft API to function. By using OneApp, you're (obviously) subject to Microsoft's Privacy Policy as well as any other services/websites you visit/encounter/use within the app.
+
+OneApp also uses the gecgudlavalleruonlinepayments.com API Services in order to provide functionality such as viewing attendance. As such use of ECAP (and other SRGEC services) are covered by the SRGEC ECAP Privacy Policy and Terms of Service. OneApp does not collect or store ECAP data and user information.
+
+OneApp also uses the Microsoft API Services in order to provide functionality such as loading profile photos for User icons. As such use of Microsoft (and other Microsoft services) are covered by the Microsoft Privacy Policy and Terms of Use. OneApp only collects and store Microsoft user profile data and user information such as name, mail, rollNo, phoneNO, user id for operarional functionality of the app.
+
+OneApp also uses the Firebase API Services in order to provide functionality such as authentication, database and cloud messaging. As such use of Firebase (and other Google services) are covered by the Google Privacy Policy and Firebase Terms of Service.
+
+If you have questions or concerns about any of the above please contact

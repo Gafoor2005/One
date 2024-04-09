@@ -286,7 +286,7 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
                                 SizedBox(
                                   width: constraints.maxWidth - 40,
                                   child: MultiSelectDropDown(
-                                    showClearIcon: true,
+                                    // showClearIcon: true,
                                     controller: multiSelectController,
                                     onOptionSelected: (options) {
                                       List<String> res = [];
