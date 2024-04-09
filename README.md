@@ -16,6 +16,6 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference. -->
 ## [Download](https://github.com/Gafoor2005/One/releases/latest) latest release apk.
 
-only use your __student id__ provided by __SRGEC__ to sign-in into the app
+only use your __student id__ provided by __my college__ to sign-in into the app
 
 # [privacy policy](PRIVACY-POLICY.md)
