@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,6 +12,7 @@ import 'package:one/core/models/form_response_model.dart';
 import 'package:one/core/models/regulation_model.dart';
 import 'package:one/core/providers/firebase_providers.dart';
 import 'package:one/core/type_defs.dart';
+import 'package:one/features/auth/controller/auth_controller.dart';
 
 final formsRepositoryProvider = Provider<FormsRepository>((ref) {
   return FormsRepository(
@@ -61,13 +63,78 @@ class FormsRepository {
     }
   }
 
-  FutureVoid addResponse(FormResponse response, String formId) async {
+  Future<int> getCountOfResponsesWithCourseId(
+    String courseId,
+    String formId,
+  ) async {
+    final Completer<int> completer = Completer<int>();
+    // TODO: change timeout time when data is large
+    Timer(const Duration(seconds: 2), () {
+      if (!completer.isCompleted) {
+        completer.completeError('Timeout, try again');
+      }
+    });
+
     try {
-      return right(_forms
+      final querySnapshot = await _firestore
+          .collection('forms')
+          .doc(formId)
+          .collection('responses')
+          .where('courseId', isEqualTo: courseId)
+          .get();
+
+      if (!completer.isCompleted) {
+        completer.complete(querySnapshot.size);
+      }
+    } catch (e) {
+      if (!completer.isCompleted) {
+        completer.completeError(e);
+      }
+    }
+
+    return completer.future;
+  }
+
+  FutureVoid addResponse(
+    FormResponse response,
+    String formId,
+    int limit,
+  ) async {
+    try {
+      var count =
+          await getCountOfResponsesWithCourseId(response.courseId, formId);
+      if (count >= limit) {
+        throw ("limit reached form not submitted");
+      }
+      await _forms
           .doc(formId)
           .collection("responses")
           .doc(response.rollNumber)
-          .set(response.toMap()));
+          .set(response.toMap());
+      count = await getCountOfResponsesWithCourseId(response.courseId, formId);
+      if (count > limit) {
+        final query = await _firestore
+            .collection('forms')
+            .doc(formId)
+            .collection('responses')
+            .where('courseId', isEqualTo: response.courseId)
+            .orderBy('timestamp')
+            .limit(limit)
+            .get();
+        bool late =
+            query.docs.where((doc) => doc.id == response.rollNumber).isEmpty;
+        log(query.docs.length.toString());
+        if (late) {
+          await _forms
+              .doc(formId)
+              .collection("responses")
+              .doc(response.rollNumber)
+              .delete();
+          return left(Failure("that was too close. try again"));
+        }
+      }
+
+      return right(FutureVoid);
     } on FirebaseException catch (e) {
       return left(Failure(e.message.toString()));
     } catch (e) {
@@ -190,8 +257,18 @@ class FormsRepository {
     });
   }
 
-  Stream<List<ElectiveForm>> fetchForms() {
-    return _forms.orderBy('batch', descending: true).snapshots().map((event) {
+  Stream<List<ElectiveForm>> fetchForms(Ref ref) {
+    final String roll = ref.watch(userProvider)!.rollNO!;
+
+    int batch = int.parse(
+        "20${roll[4] == '1' ? roll.substring(0, 2) : (int.parse(roll.substring(0, 2)) - 1)}");
+    return _forms
+        .where(
+          'batch',
+          isEqualTo: batch,
+        )
+        .snapshots()
+        .map((event) {
       log(event.docs.length.toString());
       return event.docs
           .map(

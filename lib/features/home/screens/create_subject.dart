@@ -96,7 +96,8 @@ class _CreateSubjectPageState extends ConsumerState<CreateSubjectPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("add subject", style: Theme.of(context).textTheme.titleMedium),
-            Text("R20/OE5", style: Theme.of(context).textTheme.labelSmall),
+            Text("${widget.regulationId}/${widget.electiveId}",
+                style: Theme.of(context).textTheme.labelSmall),
           ],
         ),
       ),
@@ -337,7 +338,7 @@ class _CreateSubjectPageState extends ConsumerState<CreateSubjectPage> {
                     onPressed: (nameController.text.isNotEmpty &&
                             idController.text.isNotEmpty &&
                             _courseId.hasMatch(idController.text) &&
-                            notFor.isNotEmpty &&
+                            // notFor.isNotEmpty &&
                             limitController.text.isNotEmpty &&
                             offeredByController.value.text.isNotEmpty)
                         ? () {

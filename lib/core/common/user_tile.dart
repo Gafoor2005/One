@@ -37,7 +37,7 @@ class UserTile extends StatelessWidget {
                 ),
               ),
               Text(
-                user.rollNO,
+                user.rollNO ?? "null😅",
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 12,

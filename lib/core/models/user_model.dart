@@ -12,8 +12,8 @@ class UserModel {
   final String? fcm;
   final String email;
   final bool? isAdmin;
-  final String phoneNo;
-  final String rollNO;
+  final String? phoneNo;
+  final String? rollNO;
   final DateTime lastSignInTime;
   final List<String>? roles;
   UserModel({
@@ -25,8 +25,8 @@ class UserModel {
     this.fcm,
     required this.email,
     this.isAdmin,
-    required this.phoneNo,
-    required this.rollNO,
+    this.phoneNo,
+    this.rollNO,
     required this.lastSignInTime,
     this.roles,
   });
@@ -89,12 +89,12 @@ class UserModel {
       fcm: map['fcm'] != null ? map['fcm'] as String : null,
       email: map['email'] as String,
       isAdmin: map['isAdmin'] != null ? map['isAdmin'] as bool : null,
-      phoneNo: map['phoneNo'] as String,
-      rollNO: map['rollNO'] as String,
+      phoneNo: map['phoneNo'] != null ? map['phoneNo'] as String : null,
+      rollNO: map['rollNO'] != null ? map['rollNO'] as String : null,
       lastSignInTime:
           DateTime.fromMillisecondsSinceEpoch(map['lastSignInTime'] as int),
       roles: map['roles'] != null
-          ? (map['roles'] as List).map((item) => item as String).toList()
+          ? List<String>.from((map['roles'] as List))
           : null,
     );
   }

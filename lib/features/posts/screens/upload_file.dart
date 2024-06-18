@@ -42,14 +42,14 @@ class UploadFile extends ConsumerWidget {
         'title': title,
         'body': body,
       },
-      'data': NotifPayload(
-        pid: pId,
-        uid: user.uid,
-        profilePic:
-            'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
-        email: user.email,
-        name: user.name,
-      ).toMap(),
+      // 'data': NotifPayload(
+      //   pid: pId,
+      //   uid: user.uid,
+      //   profilePic:
+      //       'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
+      //   email: user.email,
+      //   name: user.name,
+      // ).toMap(),
     };
 
     String url = dotenv.env['FCM_LEGACY_API_POST_URI']!;

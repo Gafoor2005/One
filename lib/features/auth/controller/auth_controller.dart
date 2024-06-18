@@ -2,7 +2,7 @@ import 'dart:developer';
 
 // import 'package:aad_oauth/aad_oauth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:one/bot.dart';
 import 'package:one/core/models/ms_user_model.dart';
@@ -11,6 +11,7 @@ import 'package:one/core/utils.dart';
 import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:one/main.dart';
+import 'package:routemaster/routemaster.dart';
 
 final userProvider = StateProvider<UserModel?>((ref) => null);
 
@@ -48,10 +49,12 @@ class AuthController extends StateNotifier<bool> {
 
   Stream<User?> get authStateChange => _authRepository.authStateChange;
 
-  void signInWithMS(BuildContext context) async {
+  void signInWithMS(BuildContext context, String prompt, String mail) async {
+    // await Routemaster.of(context)
+    //     .popUntil((routeData) => routeData.path == "/");
     state = true; // started loader
 
-    final result = await _authRepository.signInWithMS();
+    final result = await _authRepository.signInWithMS(prompt, mail);
     result.fold(
       (l) {
         log(l.message);
@@ -59,9 +62,9 @@ class AuthController extends StateNotifier<bool> {
         state = false;
       },
       (user) async {
-        await _ref
-            .watch(discordServiceProvider)
-            .sendMessage(":lock: **`${user.rollNO}`** `signed in`");
+        // await _ref
+        //     .watch(discordServiceProvider)
+        //     .sendMessage(":lock: **`${user.rollNO}`** `signed in`");
         _ref.read(userProvider.notifier).update((state) => user);
         // log("from controller ${user.toString()}");
         // if (user.roles != null) {

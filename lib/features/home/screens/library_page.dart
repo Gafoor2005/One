@@ -7,7 +7,41 @@ class LibraryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('library'));
+    final PageController _controller = PageController(viewportFraction: 1);
+
+    return PageView.builder(
+      itemCount: 10,
+      controller: _controller,
+      itemBuilder: (context, index) {
+        return ListenableBuilder(
+          listenable: _controller,
+          builder: (context, child) {
+            double factor = 1;
+            if (_controller.position.hasContentDimensions) {
+              factor = 1 - (_controller.page! - index).abs();
+            }
+
+            return Center(
+              child: SizedBox(
+                height: 70 + (factor * 20),
+                width: 278,
+                child: Card(
+                  color: Color.fromRGBO(160, 200, ((1 - factor) * 255).toInt(),
+                      factor * factor * factor),
+                  shadowColor: Colors.transparent,
+                  // elevation: 1,
+                  child: Center(
+                    child: Text(
+                      'Card $index',
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }
 

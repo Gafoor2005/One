@@ -168,7 +168,7 @@ class _UserTile extends ConsumerWidget {
                 style: TextStyle(color: Colors.black45),
               ),
         Text(
-          userModel.rollNO,
+          userModel.rollNO ?? "null😅",
           style: const TextStyle(
             fontFamily: "Monospace",
             letterSpacing: 0,
@@ -200,7 +200,7 @@ class _OtherInfo extends ConsumerWidget {
               fit: FlexFit.tight,
               child: Text("Roll NO"),
             ),
-            Flexible(child: Text(userModel.rollNO)),
+            Flexible(child: Text(userModel.rollNO ?? "null😅")),
           ],
         ),
         const Row(

@@ -69,7 +69,10 @@ class AuthRepository {
 
   CollectionReference get _users => _firestore.collection('users');
 
-  FutureEither<UserModel> signInWithMS() async {
+  FutureEither<UserModel> signInWithMS(
+    String prompt,
+    String mail,
+  ) async {
     try {
       MicrosoftAuthProvider msAuthProvider = MicrosoftAuthProvider();
       msAuthProvider.addScope("offline_access");
@@ -78,10 +81,10 @@ class AuthRepository {
       msAuthProvider.addScope("profile");
 
       msAuthProvider.setCustomParameters({
-        "prompt": "consent",
+        "prompt": prompt,
         "tenant": "organizations",
-        // "login_hint": "abc@def.gh"
-        // "domain_hint": "example.com"
+        "login_hint": mail,
+        "domain_hint": "gecgudlavallerumic.in"
       });
       if (kIsWeb) {
         _userCredential = await _auth.signInWithPopup(msAuthProvider);
@@ -121,7 +124,8 @@ class AuthRepository {
       return right(userModel);
     } on FirebaseException catch (e) {
       // log(e.message.toString());
-      return left(Failure(e.message.toString()));
+      // log(e.toString());
+      return left(Failure(e.code));
     } catch (e) {
       // log(e.toString());
       return left(Failure(e.toString()));
@@ -164,6 +168,10 @@ class AuthRepository {
     fullName.split(" ").forEach((e) {
       theName.add(e.capitalize());
     });
+    // ^\d{5}[A-Z]{1}\d{2}[A-Z\d]\d$
+    final rollRegex = RegExp(r"^\d{5}[A-Z]{1}\d{2}[A-Z\d]\d$");
+    final String mailName =
+        _userCredential!.additionalUserInfo!.profile!['mail']!.split('@')[0];
     UserModel userModel = UserModel(
       name: theName.join(" "),
       email: _userCredential!.additionalUserInfo!.profile!['mail'] ??
@@ -172,8 +180,7 @@ class AuthRepository {
       uid: _userCredential!.user!.uid,
       oid: _userCredential!.additionalUserInfo!.profile!['id'],
       phoneNo: _userCredential!.additionalUserInfo!.profile!['mobilePhone'],
-      rollNO:
-          _userCredential!.additionalUserInfo!.profile!['mail']!.split('@')[0],
+      rollNO: rollRegex.hasMatch(mailName) ? mailName : null,
       roles:
           (_userCredential!.additionalUserInfo!.profile!['jobTitle'] != 'null')
               ? [_userCredential!.additionalUserInfo!.profile!['jobTitle']]

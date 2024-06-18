@@ -11,6 +11,7 @@ import 'package:one/core/models/form_response_model.dart';
 import 'package:one/core/models/regulation_model.dart';
 import 'package:one/core/utils.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
+import 'package:one/features/home/screens/form_page.dart';
 import 'package:one/features/home/screens/forms_repository.dart';
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
@@ -26,7 +27,7 @@ final formsControllerProvider =
 
 final formsProvider = StreamProvider((ref) {
   final formsController = ref.watch(formsControllerProvider.notifier);
-  return formsController.fetchForms();
+  return formsController.fetchForms(ref);
 });
 final regulationProvider = StreamProvider((ref) {
   final formsController = ref.watch(formsControllerProvider.notifier);
@@ -92,16 +93,22 @@ class FormsController extends StateNotifier<bool> {
       startYear: startYear,
       lifeSpan: lifeSpan,
     );
+    bool hasPrevilages =
+        user.roles?.toSet().intersection({"Dev", "Staff"}).isNotEmpty ?? false;
 
-    final res = await _formsRepository.addRegulation(regulation);
-    state = false;
-    res.fold(
-      (l) => showSnackBar(context, l.message),
-      (r) {
-        showSnackBar(context, 'regulation added successfully!');
-        // Routemaster.of(context).pop();
-      },
-    );
+    if (hasPrevilages) {
+      final res = await _formsRepository.addRegulation(regulation);
+      state = false;
+      res.fold(
+        (l) => showSnackBar(context, l.message),
+        (r) {
+          showSnackBar(context, 'regulation added successfully!');
+          // Routemaster.of(context).pop();
+        },
+      );
+    } else {
+      showSnackBar(context, "you cant");
+    }
 
     return regulationId;
   }
@@ -111,16 +118,23 @@ class FormsController extends StateNotifier<bool> {
     required ElectiveForm form,
   }) async {
     state = true;
+    final user = _ref.read(userProvider);
+    bool hasPrevilages =
+        user?.roles?.toSet().intersection({"Dev", "Staff"}).isNotEmpty ?? false;
 
-    final res = await _formsRepository.addForm(form);
-    state = false;
-    res.fold(
-      (l) => showSnackBar(context, l.message),
-      (r) {
-        showSnackBar(context, 'Form added successfully!');
-        // Routemaster.of(context).pop();
-      },
-    );
+    if (hasPrevilages) {
+      final res = await _formsRepository.addForm(form);
+      state = false;
+      res.fold(
+        (l) => showSnackBar(context, l.message),
+        (r) {
+          showSnackBar(context, 'Form added successfully!');
+          // Routemaster.of(context).pop();
+        },
+      );
+    } else {
+      showSnackBar(context, "you cant");
+    }
 
     return form.id;
   }
@@ -129,23 +143,33 @@ class FormsController extends StateNotifier<bool> {
     required BuildContext context,
     required String formId,
     required String courseId,
+    required int limit,
   }) async {
     state = true;
     int message = 0;
 
     // String electiveId = const Uuid().v1();
     final FormResponse response = FormResponse(
-      rollNumber: _ref.watch(userProvider)!.rollNO,
+      rollNumber: _ref.watch(userProvider)!.rollNO!,
       courseId: courseId,
       timestamp: DateTime.now(),
     );
-    final res = await _formsRepository.addResponse(response, formId);
+    final res = await _formsRepository.addResponse(response, formId, limit);
     state = false;
     res.fold(
       (l) => showSnackBar(context, l.message),
       (r) async {
-        showSnackBar(context, 'response submitted successfully!');
-        message = await addToSheet(formId, courseId);
+        showSnackBar(context, 'submiting please wait');
+        message = await addToSheet(formId, courseId).then((value) {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => const SubmissionSuccess(),
+          );
+        }).then((value) {
+          showSnackBar(context, 'response submitted successfully!');
+          return Future.value(0);
+        });
+
         // Routemaster.of(context).pop();
       },
     );
@@ -163,7 +187,7 @@ class FormsController extends StateNotifier<bool> {
         "name": user.name,
         "rollNumber": user.rollNO,
         "email": user.email,
-        "branch": "CSE",
+        "branch": "__",
         "phone": user.phoneNo,
         "timestamp": DateFormat.yMd().add_jms().format(DateTime.now()),
       });
@@ -197,15 +221,22 @@ class FormsController extends StateNotifier<bool> {
       name: name,
       type: type,
     );
-    final res = await _formsRepository.addElective(elective, regulationId);
-    state = false;
-    res.fold(
-      (l) => showSnackBar(context, l.message),
-      (r) {
-        showSnackBar(context, 'Elective created successfully!');
-        // Routemaster.of(context).pop();
-      },
-    );
+    final user = _ref.read(userProvider);
+    bool hasPrevilages =
+        user?.roles?.toSet().intersection({"Dev", "Staff"}).isNotEmpty ?? false;
+    if (hasPrevilages) {
+      final res = await _formsRepository.addElective(elective, regulationId);
+      state = false;
+      res.fold(
+        (l) => showSnackBar(context, l.message),
+        (r) {
+          showSnackBar(context, 'Elective created successfully!');
+          // Routemaster.of(context).pop();
+        },
+      );
+    } else {
+      showSnackBar(context, "you cant");
+    }
 
     return electiveId;
   }
@@ -219,16 +250,24 @@ class FormsController extends StateNotifier<bool> {
     state = true;
     // String electiveId = const Uuid().v1();
     // final elective = Elective(id: electiveId, name: name, type: type);
-    final res =
-        await _formsRepository.addSubject(subject, regulationId, electiveId);
-    state = false;
-    res.fold(
-      (l) => showSnackBar(context, l.message),
-      (r) {
-        showSnackBar(context, 'Subject added successfully!');
-        // Routemaster.of(context).pop();
-      },
-    );
+
+    final user = _ref.read(userProvider);
+    bool hasPrevilages =
+        user?.roles?.toSet().intersection({"Dev", "Staff"}).isNotEmpty ?? false;
+    if (hasPrevilages) {
+      final res =
+          await _formsRepository.addSubject(subject, regulationId, electiveId);
+      state = false;
+      res.fold(
+        (l) => showSnackBar(context, l.message),
+        (r) {
+          showSnackBar(context, 'Subject added successfully!');
+          // Routemaster.of(context).pop();
+        },
+      );
+    } else {
+      showSnackBar(context, "you cant");
+    }
 
     return electiveId;
   }
@@ -250,8 +289,8 @@ class FormsController extends StateNotifier<bool> {
     return _formsRepository.fetchRegulation();
   }
 
-  Stream<List<ElectiveForm>> fetchForms() {
-    return _formsRepository.fetchForms();
+  Stream<List<ElectiveForm>> fetchForms(Ref ref) {
+    return _formsRepository.fetchForms(ref);
   }
 
   Future<void> deletRegulation(String id) {

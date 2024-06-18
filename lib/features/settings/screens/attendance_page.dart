@@ -216,7 +216,7 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
   void getAttendance(BuildContext context) async {
     if (await ref
         .watch(apiControllerProvider.notifier)
-        .getAttendance(context, ref.watch(userProvider)!.rollNO)) {
+        .getAttendance(context, ref.watch(userProvider)!.rollNO!)) {
       access = false;
     }
     setState(() {});

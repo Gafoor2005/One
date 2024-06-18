@@ -24,9 +24,9 @@ class AccountPage extends StatelessWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(15)),
                 color: Colors.blue.shade50,
               ),
-              child: Column(
+              child: const Column(
                 children: [
-                  const AccountPageProfile(),
+                  AccountPageProfile(),
                   // Container(
                   //   margin: EdgeInsets.symmetric(horizontal: 20),
                   //   decoration: BoxDecoration(
@@ -58,50 +58,6 @@ class AccountPage extends StatelessWidget {
                   //     ],
                   //   ),
                   // )
-                  Card(
-                    clipBehavior: Clip.antiAlias,
-                    shadowColor: Colors.black,
-                    surfaceTintColor: Colors.white,
-                    child: Wrap(
-                      children: [
-                        ListTile(
-                          leading: const Icon(
-                            Icons.person,
-                            color: Colors.black,
-                          ),
-                          title: const Text("Bio"),
-                          onTap: () {
-                            // Routemaster.of(context).push("/bio");
-                          },
-                          trailing: const Icon(Icons.navigate_next_rounded),
-                        ),
-                        const Divider(
-                          height: 1,
-                        ),
-                        ListTile(
-                          leading: const Icon(
-                            Icons.event_available_rounded,
-                            color: Colors.black,
-                          ),
-                          title: const Text("attendance"),
-                          onTap: () {
-                            Routemaster.of(context).push("/set-pass");
-                          },
-                          trailing: const Icon(Icons.navigate_next_rounded),
-                        ),
-                        const Divider(height: 1),
-                        ListTile(
-                          leading: const Icon(
-                            Icons.assignment,
-                            color: Colors.black,
-                          ),
-                          title: const Text("marks"),
-                          onTap: () {},
-                          trailing: const Icon(Icons.navigate_next_rounded),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -109,7 +65,7 @@ class AccountPage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: const BottomAppBar(),
+      // bottomNavigationBar: const BottomAppBar(),
     );
   }
 }

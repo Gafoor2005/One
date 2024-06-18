@@ -21,16 +21,14 @@ import 'package:one/features/settings/screens/attendance_page.dart';
 import 'package:one/features/settings/screens/bio_page.dart';
 import 'package:one/notif.dart';
 import 'package:one/offline_test.dart';
-import 'package:one/policy.dart';
 import 'package:routemaster/routemaster.dart';
 
 final waitingRoute = RouteMap(routes: {
   '/': (_) => const MaterialPage(child: ChatPage()),
 });
 final loggedOutRoute = RouteMap(routes: {
-  '/policy': (_) => const MaterialPage(child: PolicyPage()),
   '/more-info': (_) => const MaterialPage(child: NeedMoreInfo()),
-  '/notif': (r) => const MaterialPage(child: Notif()),
+  // '/notif': (r) => const MaterialPage(child: Notif()),
   '/': (_) => const MaterialPage(child: LoginPage()),
 });
 
@@ -73,7 +71,7 @@ final loggedInRoute = RouteMap(routes: {
   '/bio': (_) => const MaterialPage(child: BioPage()),
   '/upload-file': (_) => const MaterialPage(child: UploadFile()),
   '/create-post': (_) => const MaterialPage(child: CreatePostPage()),
-  '/notif': (_) => const MaterialPage(child: Notif()),
+  // '/notif': (_) => const MaterialPage(child: Notif()),
   '/add-news': (_) => const MaterialPage(child: AddNews()),
   '/post/:id': (info) => MaterialPage(
         child: PostDetails(

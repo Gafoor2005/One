@@ -15,7 +15,7 @@ class _BioPageState extends ConsumerState<BioPage> {
   void getBio(BuildContext context) {
     ref
         .watch(apiControllerProvider.notifier)
-        .getBio(context, ref.watch(userProvider)!.rollNO);
+        .getBio(context, ref.watch(userProvider)!.rollNO!);
     setState(() {});
   }
 

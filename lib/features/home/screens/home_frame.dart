@@ -1,16 +1,14 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one/bot.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
-import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:one/features/home/screens/home_page.dart';
 import 'package:one/features/settings/screens/account_page.dart';
-import 'package:one/notif.dart';
 import 'package:routemaster/routemaster.dart';
 import 'package:http/http.dart' as http;
 
@@ -89,15 +87,15 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
     //   Routemaster.of(context).push('post/${data.pid}');
     // });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      logOnline();
-      try {
-        final response = await http.get(Uri.parse(
-            "https://raw.githubusercontent.com/Gafoor2005/One/main/settings.json"));
-        final Map<String, dynamic> settings = jsonDecode(response.body);
-        ref.watch(settingsProvider.notifier).update((state) => settings);
-      } on Exception catch (e) {
-        // TODO
-      }
+      // logOnline();
+      // try {
+      //   final response = await http.get(Uri.parse(
+      //       "https://raw.githubusercontent.com/Gafoor2005/One/main/settings.json"));
+      //   final Map<String, dynamic> settings = jsonDecode(response.body);
+      //   ref.watch(settingsProvider.notifier).update((state) => settings);
+      // } on Exception catch (e) {
+      //   // TODO
+      // }
       // log(response.body);
     });
   }
@@ -252,47 +250,47 @@ class _HomeFrameState extends ConsumerState<HomeFrame> {
               AccountPage(),
             ],
           ),
-          Container(
-            margin: const EdgeInsets.only(
-              left: 21,
-              right: 21,
-              bottom: 8,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.black,
-            ),
-            clipBehavior: Clip.hardEdge,
-            child: Theme(
-              data: ThemeData(
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-              ),
-              child: BottomNavigationBar(
-                backgroundColor: Colors.transparent,
-                currentIndex: currentIndex,
-                showSelectedLabels: false,
-                showUnselectedLabels: false,
-                selectedFontSize: 0,
-                unselectedFontSize: 0,
-                type: BottomNavigationBarType.fixed,
-                // selectedItemColor: Colors.white,
-                items: [
-                  navItem('home'),
-                  navItem('chat'),
-                  navItem('library'),
-                  navItem('person'),
-                ],
-                onTap: (value) {
-                  if (currentIndex != value) {
-                    setCurrentIndex(value);
-                  }
-                },
-                enableFeedback: true,
-              ),
-            ),
-          ),
+          // Container(
+          //   margin: const EdgeInsets.only(
+          //     left: 21,
+          //     right: 21,
+          //     bottom: 8,
+          //   ),
+          //   decoration: BoxDecoration(
+          //     borderRadius: BorderRadius.circular(10),
+          //     color: Colors.black,
+          //   ),
+          //   clipBehavior: Clip.hardEdge,
+          //   child: Theme(
+          //     data: ThemeData(
+          //       splashColor: Colors.transparent,
+          //       highlightColor: Colors.transparent,
+          //       shadowColor: Colors.transparent,
+          //     ),
+          //     child: BottomNavigationBar(
+          //       backgroundColor: Colors.transparent,
+          //       currentIndex: currentIndex,
+          //       showSelectedLabels: false,
+          //       showUnselectedLabels: false,
+          //       selectedFontSize: 0,
+          //       unselectedFontSize: 0,
+          //       type: BottomNavigationBarType.fixed,
+          //       // selectedItemColor: Colors.white,
+          //       items: [
+          //         navItem('home'),
+          //         navItem('chat'),
+          //         navItem('library'),
+          //         navItem('person'),
+          //       ],
+          //       onTap: (value) {
+          //         if (currentIndex != value) {
+          //           setCurrentIndex(value);
+          //         }
+          //       },
+          //       enableFeedback: true,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
 

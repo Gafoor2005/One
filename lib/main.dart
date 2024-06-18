@@ -4,7 +4,7 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,17 +25,17 @@ import 'package:yaml/yaml.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(
-  RemoteMessage message,
-) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // await setupFlutterNotifications(); // removed due to redendency
-  // showFlutterNotification(message);
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  debugPrint('Handling a background message ${message.messageId}');
-}
+// @pragma('vm:entry-point')
+// Future<void> _firebaseMessagingBackgroundHandler(
+//   RemoteMessage message,
+// ) async {
+//   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+//   // await setupFlutterNotifications(); // removed due to redendency
+//   // showFlutterNotification(message);
+//   // If you're going to use other Firebase services in the background, such as Firestore,
+//   // make sure you call `initializeApp` before using other Firebase services.
+//   debugPrint('Handling a background message ${message.messageId}');
+// }
 
 late AndroidNotificationChannel channel;
 
@@ -89,41 +89,41 @@ Future<void> setupFlutterNotifications() async {
 
   /// Update the iOS foreground notification presentation options to allow
   /// heads up notifications.
-  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
+  // await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+  //   alert: true,
+  //   badge: true,
+  //   sound: true,
+  // );
   isFlutterLocalNotificationsInitialized = true;
 }
 
-void showFlutterNotification(RemoteMessage message) {
-  RemoteNotification? notification = message.notification;
-  AndroidNotification? android = message.notification?.android;
+// void showFlutterNotification(RemoteMessage message) {
+//   RemoteNotification? notification = message.notification;
+//   AndroidNotification? android = message.notification?.android;
 
-  if (notification != null && android != null && !kIsWeb) {
-    debugPrint("showing flutter notif");
-    flutterLocalNotificationsPlugin.show(
-      notification.hashCode,
-      notification.title,
-      notification.body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          channel.id,
-          channel.name,
-          channelDescription: channel.description,
-          // TODO add a proper drawable resource to android, for now using
-          //      one that already exists in example app.
-          // icon: 'launch_background',
-          // icon: 'ic_launcher', // optional else AndroidInitializationSettings.defaultIcon will be used
-          // ongoing: true, // will not be cleared unitl open app
-          styleInformation: BigTextStyleInformation(notification.body ?? ''),
-        ),
-      ),
-      payload: jsonEncode(message.toMap()),
-    );
-  }
-}
+//   if (notification != null && android != null && !kIsWeb) {
+//     debugPrint("showing flutter notif");
+//     flutterLocalNotificationsPlugin.show(
+//       notification.hashCode,
+//       notification.title,
+//       notification.body,
+//       NotificationDetails(
+//         android: AndroidNotificationDetails(
+//           channel.id,
+//           channel.name,
+//           channelDescription: channel.description,
+//           // TODO add a proper drawable resource to android, for now using
+//           //      one that already exists in example app.
+//           // icon: 'launch_background',
+//           // icon: 'ic_launcher', // optional else AndroidInitializationSettings.defaultIcon will be used
+//           // ongoing: true, // will not be cleared unitl open app
+//           styleInformation: BigTextStyleInformation(notification.body ?? ''),
+//         ),
+//       ),
+//       payload: jsonEncode(message.toMap()),
+//     );
+//   }
+// }
 
 late bool loginStatus;
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
@@ -144,13 +144,13 @@ Future<void> main() async {
   );
 
   if (!kIsWeb) {
-    await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await setupFlutterNotifications();
+    // await FirebaseMessaging.instance.requestPermission(
+    //   alert: true,
+    //   badge: true,
+    //   sound: true,
+    // );
+    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    // await setupFlutterNotifications();
   }
 
   runApp(
@@ -169,9 +169,9 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> {
   static void handleLocalOpenApp(NotificationResponse response) {
-    RemoteMessage message =
-        RemoteMessage.fromMap(jsonDecode(response.payload ?? '{}'));
-    log(message.notification?.title ?? 'nono');
+    // RemoteMessage message =
+    //     RemoteMessage.fromMap(jsonDecode(response.payload ?? '{}'));
+    // log(message.notification?.title ?? 'nono');
     // TODO add a condition to not display if sender-id is me
     // navkey.currentState!.push(MaterialPageRoute(
     //     builder: (context) => Notif(
@@ -245,7 +245,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      getAppVersion();
+      // getAppVersion();
     });
   }
 
@@ -337,7 +337,14 @@ class _MyAppState extends ConsumerState<MyApp> {
                 colorScheme: ColorScheme.fromSeed(
                   seedColor: const Color.fromARGB(255, 0, 35, 68),
                 ),
+                scaffoldBackgroundColor: const Color(0xFAFFFFFF),
                 useMaterial3: true,
+                appBarTheme: const AppBarTheme(
+                  systemOverlayStyle: SystemUiOverlayStyle(
+                    systemNavigationBarColor:
+                        Color.fromARGB(255, 234, 234, 234),
+                  ),
+                ),
               ),
               routerDelegate: RoutemasterDelegate(
                 routesBuilder: (context) {

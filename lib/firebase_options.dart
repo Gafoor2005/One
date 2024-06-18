@@ -48,17 +48,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyD2Rui9s4zYXRfZJgBTpxupTpBOehI61TU',
-    appId: '1:1074945236940:web:d8909d6faa27fade604769',
+    appId: '1:1074945236940:web:2da283329661c69d604769',
     messagingSenderId: '1074945236940',
     projectId: 'oneapp-af948',
     authDomain: 'oneapp-af948.firebaseapp.com',
     storageBucket: 'oneapp-af948.appspot.com',
-    measurementId: 'G-3JGGRFT3SM',
+    measurementId: 'G-4VJ5JVECFL',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyB61sEJpziCAgNjYkycjfGCCAzI1yYg2l8',
-    appId: '1:1074945236940:android:ddca01f02aeda7dc604769',
+    appId: '1:1074945236940:android:692c1366ed9e030f604769',
     messagingSenderId: '1074945236940',
     projectId: 'oneapp-af948',
     storageBucket: 'oneapp-af948.appspot.com',
@@ -66,12 +66,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAmFkffOWyW73NQ9qln_kUTiM3Y0bPb6BY',
-    appId: '1:1074945236940:ios:ea051195150927ce604769',
+    appId: '1:1074945236940:ios:558925aee4b80156604769',
     messagingSenderId: '1074945236940',
     projectId: 'oneapp-af948',
     storageBucket: 'oneapp-af948.appspot.com',
     androidClientId: '1074945236940-5590q14ssqcpvpna5f1pdao4374v6909.apps.googleusercontent.com',
-    iosClientId: '1074945236940-r90d8esa3ne2ec47q2msnmcau2ukbnnu.apps.googleusercontent.com',
-    iosBundleId: 'com.example.one',
+    iosClientId: '1074945236940-137ocdo8qpjd2gkiftov58ecjstjoeod.apps.googleusercontent.com',
+    iosBundleId: 'me.devloopers.one',
   );
+
 }

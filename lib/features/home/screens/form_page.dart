@@ -2,11 +2,12 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:http/http.dart';
 
 import 'package:one/core/common/loader.dart';
+import 'package:one/core/models/department_model.dart';
 import 'package:one/core/models/elective_subject_model.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/home/screens/forms_controller.dart';
@@ -27,39 +28,21 @@ class _FormPageState extends ConsumerState<FormPage> {
   ElectiveSubject? selectedSubject;
 
   void submitForm() async {
-    await ref
-        .watch(formsControllerProvider.notifier)
-        .addResponse(
+    await ref.watch(formsControllerProvider.notifier).addResponse(
           context: context,
           formId: widget.formId,
           courseId: selectedSubject!.id,
-        )
-        .then((value) {
-      showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return SizedBox(
-            width: double.infinity,
-            height: 500,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const FaIcon(FontAwesomeIcons.circleCheck),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text("$value response submitted successfully"),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    });
+          limit: selectedSubject!.limit,
+        );
   }
 
   bool submitted = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,14 +67,13 @@ class _FormPageState extends ConsumerState<FormPage> {
                           if (registerIndex != -1) {
                             String registeredCourseId =
                                 responses[registerIndex].courseId;
-                            log(responses[registerIndex].courseId);
+                            // log(responses[registerIndex].courseId);
                             selectedSubject = subjects.singleWhere(
                                 (subject) => subject.id == registeredCourseId);
-                            log(selectedSubject.toString());
+                            // log(selectedSubject.toString());
                             submitted = true;
                           }
 
-                          log("message");
                           return ListView.builder(
                             itemCount: subjects.length + 1,
                             itemBuilder: (context, index) {
@@ -129,6 +111,12 @@ class _FormPageState extends ConsumerState<FormPage> {
                                   ],
                                 );
                               }
+                              if (subjects[index].notFor.contains(
+                                  departmentFromRollNumber(
+                                      ref.watch(userProvider)!.rollNO!))) {
+                                // return Text(subjects[index].name);
+                                return const SizedBox();
+                              }
                               int registerCount = responses
                                   .where((response) =>
                                       response.courseId == subjects[index].id)
@@ -144,7 +132,12 @@ class _FormPageState extends ConsumerState<FormPage> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(subjects[index].name),
+                                      Expanded(
+                                        child: Text(
+                                          subjects[index].name,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
                                       Text(
                                           "$registerCount/${subjects[index].limit.toString()}"),
                                     ],
@@ -189,6 +182,30 @@ class _FormPageState extends ConsumerState<FormPage> {
             error: (error, stackTrace) => Text(error.toString()),
             loading: () => const Loader(),
           ),
+    );
+  }
+}
+
+class SubmissionSuccess extends StatelessWidget {
+  const SubmissionSuccess({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: double.infinity,
+      height: 500,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FaIcon(FontAwesomeIcons.circleCheck),
+            SizedBox(
+              height: 10,
+            ),
+            Text("response submitted successfully"),
+          ],
+        ),
+      ),
     );
   }
 }

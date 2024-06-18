@@ -6,9 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one/core/common/error_text.dart';
 import 'package:one/core/common/loader.dart';
+import 'package:one/core/models/user_model.dart';
+import 'package:one/core/utils.dart';
+import 'package:one/features/auth/controller/auth_controller.dart';
 import 'package:one/features/home/screens/forms_controller.dart';
 import 'package:one/features/home/screens/news.dart';
 import 'package:one/features/home/screens/news_controller.dart';
+import 'package:one/features/settings/screens/account_page.dart';
 import 'package:routemaster/routemaster.dart';
 
 Map<String, String> headers = {
@@ -23,176 +27,77 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    UserModel userModel = ref.watch(userProvider)!;
     return Scaffold(
-      appBar: AppBar(
-        leadingWidth: 70,
-        leading: Row(
-          children: [
-            const SizedBox(
-              width: 15,
-            ),
-            IconButton.filledTonal(
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-              icon: const Icon(Icons.menu),
-            ),
-          ],
-        ),
-        title: SvgPicture.asset('assets/icons/devloopers.svg'),
-        titleSpacing: 0,
-      ),
+      // appBar: AppBar(
+      //   leadingWidth: 70,
+      //   leading: Row(
+      //     children: [
+      //       const SizedBox(
+      //         width: 15,
+      //       ),
+      //       IconButton.filledTonal(
+      //         onPressed: () {
+      //           Scaffold.of(context).openDrawer();
+      //         },
+      //         icon: const Icon(Icons.menu),
+      //       ),
+      //     ],
+      //   ),
+      //   title: SvgPicture.asset('assets/icons/devloopers.svg'),
+      //   titleSpacing: 0,
+      // ),
       body: SafeArea(
         child: LayoutBuilder(builder: (context, constraints) {
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                HomePageBanners(
-                  constraints: constraints,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                const SideTitle(titleText: 'News'),
-                SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 21),
-                  scrollDirection: Axis.horizontal,
-                  clipBehavior: Clip.none,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        height: 150,
-                        child: ref.watch(newsProvider).when(
-                              data: (data) {
-                                return ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    shrinkWrap: true,
-                                    itemCount: data.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      News a = data[index];
-                                      return NewsCard.fromNews(
-                                        news: a,
-                                      );
-                                    });
-                              },
-                              error: (error, stackTrace) {
-                                return ErrorText(error: error.toString());
-                              },
-                              loading: () => Container(
-                                padding: const EdgeInsets.all(19),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(17),
-                                  color:
-                                      Theme.of(context).colorScheme.onSecondary,
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      blurRadius: 3,
-                                      spreadRadius: -1,
-                                      color: Colors.black38,
-                                    )
-                                  ],
-                                ),
-                                clipBehavior: Clip.none,
-                                margin: const EdgeInsets.only(
-                                  right: 10,
-                                  bottom: 10,
-                                ),
-                                width: 300,
-                                child: const Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Lorem ipsum dolor sit amet.",
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'FlowCircular',
-                                        fontSize: 16,
-                                        height: 1,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 6,
-                                    ),
-                                    Text(
-                                      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto beatae laudantium commodi tempora accusantium incidunt.",
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: 'FlowCircular',
-                                        fontSize: 13,
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 9,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "Lorem, ipsum.",
-                                          style: TextStyle(
-                                            fontFamily: 'FlowCircular',
-                                            fontSize: 12,
-                                            // color: Color.fromRGBO(151, 115, 115, 1),
-                                            color: Colors.black45,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                      ),
-                      Container(
-                        width: 200,
-                        height: 130,
-                        margin: const EdgeInsets.only(bottom: 10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(7),
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        child: const Center(
-                            child: Text(
-                          'see more',
-                          style: TextStyle(
-                            fontFamily: 'AlegreyaSans',
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
+                Padding(
+                  padding: const EdgeInsets.all(21),
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const AccountPage())),
+                    child: Container(
+                      padding: EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: NetworkImage(userModel.profilePic),
+                            // onBackgroundImageError: (exception, stackTrace) =>
+                            //     showSnackBar(context, exception.toString()),
+                            radius: 25,
                           ),
-                        )),
-                      )
-                    ],
-                  ),
-                ),
-                const SideTitle(titleText: 'Events'),
-                const SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 21),
-                  clipBehavior: Clip.none,
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      EventCard(
-                        date: '25',
-                        month: 'DEC',
-                        eventTitle: "One app launch event",
-                        shortVenu: "Virtual event on Discord",
-                        organizers: "DevLoopers",
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  userModel.name,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontFamily: "AlegreyaSans",
+                                  ),
+                                ),
+                                Text(
+                                  userModel.rollNO ?? "null😅",
+                                  style: const TextStyle(
+                                    fontFamily: "Monospace",
+                                    letterSpacing: 0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      EventCard(
-                        date: '30',
-                        month: 'OCT',
-                        eventTitle: "Tech Innovation Hackathon 2024",
-                        shortVenu: "A4 seminar hall, SRGEC",
-                      ),
-                      _EventCardSeeMore(),
-                    ],
+                    ),
                   ),
                 ),
                 const SideTitle(titleText: 'Forms'),
