@@ -134,7 +134,7 @@ class AuthRepository {
 
   Future<UserModel> createAccountForDB() async {
     log("New user");
-    String photoUrl = dotenv.env['PROFILE_ICON_URL']!;
+    String photoUrl = const String.fromEnvironment('PROFILE_ICON_URL');
 
     final response = await http.get(
       Uri.parse('https://graph.microsoft.com/v1.0/me/photo/\$value'),
@@ -339,13 +339,13 @@ class AuthRepository {
   }
 
   Future<void> logOut(WidgetRef ref) async {
-    if (ref.watch(userProvider) == null) {
-      await ref.watch(discordServiceProvider).sendMessage(
-          ":red_square: **`${_auth.currentUser!.uid}`** `Account Not Found logged out`");
-    } else {
-      await ref.watch(discordServiceProvider).sendMessage(
-          ":red_square: **`${ref.watch(userProvider)!.rollNO}`** `logged out`");
-    }
+    // if (ref.watch(userProvider) == null) {
+    //   await ref.watch(discordServiceProvider).sendMessage(
+    //       ":red_square: **`${_auth.currentUser!.uid}`** `Account Not Found logged out`");
+    // } else {
+    //   await ref.watch(discordServiceProvider).sendMessage(
+    //       ":red_square: **`${ref.watch(userProvider)!.rollNO}`** `logged out`");
+    // }
 
     ref.watch(userProvider.notifier).update((state) => null);
     ref.watch(attendanceProvider.notifier).update((state) => null);

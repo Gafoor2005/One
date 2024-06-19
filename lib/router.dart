@@ -22,6 +22,7 @@ import 'package:one/features/settings/screens/bio_page.dart';
 import 'package:one/notif.dart';
 import 'package:one/offline_test.dart';
 import 'package:routemaster/routemaster.dart';
+import 'package:one/features/settings/screens/account_page.dart';
 
 final waitingRoute = RouteMap(routes: {
   '/': (_) => const MaterialPage(child: ChatPage()),
@@ -73,6 +74,7 @@ final loggedInRoute = RouteMap(routes: {
   '/create-post': (_) => const MaterialPage(child: CreatePostPage()),
   // '/notif': (_) => const MaterialPage(child: Notif()),
   '/add-news': (_) => const MaterialPage(child: AddNews()),
+  '/accounts': (_) => const MaterialPage(child: AccountPage()),
   '/post/:id': (info) => MaterialPage(
         child: PostDetails(
           id: info.pathParameters['id']!,

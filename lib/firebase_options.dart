@@ -25,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -73,6 +67,27 @@ class DefaultFirebaseOptions {
     androidClientId: '1074945236940-5590q14ssqcpvpna5f1pdao4374v6909.apps.googleusercontent.com',
     iosClientId: '1074945236940-137ocdo8qpjd2gkiftov58ecjstjoeod.apps.googleusercontent.com',
     iosBundleId: 'me.devloopers.one',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAmFkffOWyW73NQ9qln_kUTiM3Y0bPb6BY',
+    appId: '1:1074945236940:ios:ca5b4b8bbdd8d199604769',
+    messagingSenderId: '1074945236940',
+    projectId: 'oneapp-af948',
+    storageBucket: 'oneapp-af948.appspot.com',
+    androidClientId: '1074945236940-5590q14ssqcpvpna5f1pdao4374v6909.apps.googleusercontent.com',
+    iosClientId: '1074945236940-r90d8esa3ne2ec47q2msnmcau2ukbnnu.apps.googleusercontent.com',
+    iosBundleId: 'com.example.one',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyD2Rui9s4zYXRfZJgBTpxupTpBOehI61TU',
+    appId: '1:1074945236940:web:f7d43b78548f8b48604769',
+    messagingSenderId: '1074945236940',
+    projectId: 'oneapp-af948',
+    authDomain: 'oneapp-af948.firebaseapp.com',
+    storageBucket: 'oneapp-af948.appspot.com',
+    measurementId: 'G-QN8BF44M5K',
   );
 
 }

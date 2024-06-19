@@ -180,7 +180,8 @@ class FormsController extends StateNotifier<bool> {
   Future<int> addToSheet(String formId, String courseId) async {
     final user = _ref.read(userProvider)!;
     try {
-      String url = dotenv.env['APP_SCRIPT_URL']!;
+      // String url = dotenv.env['APP_SCRIPT_URL']!;
+      String url = const String.fromEnvironment("APP_SCRIPT_URL");
       var data = json.encode({
         "fileName": formId,
         "sheetName": courseId,
@@ -203,6 +204,7 @@ class FormsController extends StateNotifier<bool> {
         return 0;
       }
     } catch (e) {
+      print(e.toString());
       return 0;
     }
   }

@@ -56,8 +56,7 @@ class HomePage extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.all(21),
                   child: GestureDetector(
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const AccountPage())),
+                    onTap: () => Routemaster.of(context).push('/accounts'),
                     child: Container(
                       padding: EdgeInsets.all(18),
                       decoration: BoxDecoration(
