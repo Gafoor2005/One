@@ -64,7 +64,7 @@ OneApp is committed to protecting the privacy of its users. This Privacy Policy 
 
 **9. Contact Us:**
 
-- If you have any questions or concerns about this Privacy Policy, please contact us at developers@gecgudlavallerumic.in.
+- If you have any questions or concerns about this Privacy Policy, please contact us at Gafoor@Devloopers.me.
 
 By using **OneApp**, you agree to the terms outlined in this Privacy Policy.
 
