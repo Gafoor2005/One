@@ -1,10 +1,16 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:one/core/models/user_model.dart';
 import 'package:one/core/utils.dart';
 import 'package:one/features/auth/controller/auth_controller.dart';
+import 'package:one/features/auth/repository/auth_repository.dart';
 import 'package:routemaster/routemaster.dart';
+import 'package:http/http.dart' as http;
 
 class AccountPageProfile extends ConsumerStatefulWidget {
   const AccountPageProfile({super.key});
@@ -16,6 +22,24 @@ class AccountPageProfile extends ConsumerStatefulWidget {
 
 class _AccountPageProfileState extends ConsumerState<AccountPageProfile> {
   bool dropdown = false;
+  MemoryImage? msImg;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // loadImg();
+  }
+
+  void loadImg() async {
+    final http.Response res =
+        await ref.watch(authRepositoryProvider).getImage();
+    if (res.statusCode == 200) {
+      msImg = MemoryImage(res.bodyBytes);
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final UserModel? userModel = ref.watch(userProvider);
@@ -35,7 +59,8 @@ class _AccountPageProfileState extends ConsumerState<AccountPageProfile> {
                 Row(
                   children: [
                     CircleAvatar(
-                      backgroundImage: NetworkImage(userModel.profilePic),
+                      backgroundImage:
+                          const AssetImage("assets/userIconDark.png"),
                       onBackgroundImageError: (exception, stackTrace) =>
                           showSnackBar(context, exception.toString()),
                       radius: 25,

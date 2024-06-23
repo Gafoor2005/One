@@ -132,10 +132,7 @@ class AuthRepository {
     }
   }
 
-  Future<UserModel> createAccountForDB() async {
-    log("New user");
-    String photoUrl = const String.fromEnvironment('PROFILE_ICON_URL');
-
+  Future<http.Response> getImage() async {
     final response = await http.get(
       Uri.parse('https://graph.microsoft.com/v1.0/me/photo/\$value'),
       headers: {
@@ -143,23 +140,37 @@ class AuthRepository {
         'Content-Type': 'application/json',
       },
     );
-    if (response.statusCode == 200) {
-      final file = await createTempFileFromPostRequestBody(response);
-      // log(file.path);
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profilePictures/${_userCredential!.user!.uid}');
+    return response;
+  }
 
-      try {
-        //Store the file
-        await storageRef.putFile(File(file.path));
-        //Success: get the download URL
-        photoUrl = await storageRef.getDownloadURL();
-      } catch (error) {
-        // log(error.toString());
-        rethrow;
-      }
-    }
+  Future<UserModel> createAccountForDB() async {
+    log("New user");
+    String photoUrl = const String.fromEnvironment('PROFILE_ICON_URL');
+
+    // final response = await http.get(
+    //   Uri.parse('https://graph.microsoft.com/v1.0/me/photo/\$value'),
+    //   headers: {
+    //     'Authorization': 'Bearer ${_userCredential!.credential!.accessToken}',
+    //     'Content-Type': 'application/json',
+    //   },
+    // );
+    // if (response.statusCode == 200) {
+    //   final file = await createTempFileFromPostRequestBody(response);
+    //   // log(file.path);
+    //   final storageRef = FirebaseStorage.instance
+    //       .ref()
+    //       .child('profilePictures/${_userCredential!.user!.uid}');
+
+    //   try {
+    //     //Store the file
+    //     await storageRef.putFile(File(file.path));
+    //     //Success: get the download URL
+    //     photoUrl = await storageRef.getDownloadURL();
+    //   } catch (error) {
+    //     // log(error.toString());
+    //     rethrow;
+    //   }
+    // }
     final String fullName =
         _userCredential!.additionalUserInfo!.profile!['givenName'] +
             " " +
@@ -172,6 +183,13 @@ class AuthRepository {
     final rollRegex = RegExp(r"^\d{5}[A-Z]{1}\d{2}[A-Z\d]\d$");
     final String mailName =
         _userCredential!.additionalUserInfo!.profile!['mail']!.split('@')[0];
+    int? out;
+    if (rollRegex.hasMatch(mailName)) {
+      out = int.parse(
+          "20${mailName[4] == '1' ? mailName.substring(0, 2) : (int.parse(mailName.substring(0, 2)) - 1)}");
+      out = out - 2000;
+      out = out + 4;
+    }
     UserModel userModel = UserModel(
       name: theName.join(" "),
       email: _userCredential!.additionalUserInfo!.profile!['mail'] ??
@@ -179,8 +197,9 @@ class AuthRepository {
       profilePic: photoUrl,
       uid: _userCredential!.user!.uid,
       oid: _userCredential!.additionalUserInfo!.profile!['id'],
-      phoneNo: _userCredential!.additionalUserInfo!.profile!['mobilePhone'],
+      phoneNo: _userCredential!.additionalUserInfo!.profile?['mobilePhone'],
       rollNO: rollRegex.hasMatch(mailName) ? mailName : null,
+      out: out,
       roles:
           (_userCredential!.additionalUserInfo!.profile!['jobTitle'] != 'null')
               ? [_userCredential!.additionalUserInfo!.profile!['jobTitle']]

@@ -24,6 +24,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:yaml/yaml.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
+import 'package:url_strategy/url_strategy.dart';
 
 // @pragma('vm:entry-point')
 // Future<void> _firebaseMessagingBackgroundHandler(
@@ -133,6 +134,7 @@ class Environment {
 }
 
 Future<void> main() async {
+  setPathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb) {
     await dotenv.load(fileName: ".env");

@@ -14,6 +14,7 @@ import 'package:one/features/home/screens/news.dart';
 import 'package:one/features/home/screens/news_controller.dart';
 import 'package:one/features/settings/screens/account_page.dart';
 import 'package:routemaster/routemaster.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Map<String, String> headers = {
   'Accept':
@@ -49,173 +50,206 @@ class HomePage extends ConsumerWidget {
       // ),
       body: SafeArea(
         child: LayoutBuilder(builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(21),
-                  child: GestureDetector(
-                    onTap: () => Routemaster.of(context).push('/accounts'),
-                    child: Container(
-                      padding: EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                          color: Colors.black12,
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundImage: NetworkImage(userModel.profilePic),
-                            // onBackgroundImageError: (exception, stackTrace) =>
-                            //     showSnackBar(context, exception.toString()),
-                            radius: 25,
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  userModel.name,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontFamily: "AlegreyaSans",
-                                  ),
-                                ),
-                                Text(
-                                  userModel.rollNO ?? "null😅",
-                                  style: const TextStyle(
-                                    fontFamily: "Monospace",
-                                    letterSpacing: 0,
-                                  ),
-                                ),
-                              ],
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(21),
+                    child: GestureDetector(
+                      onTap: () => Routemaster.of(context).push('/accounts'),
+                      child: Container(
+                        padding: EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                            color: Colors.black12,
+                            borderRadius: BorderRadius.circular(20)),
+                        child: Row(
+                          children: [
+                            const CircleAvatar(
+                              backgroundImage:
+                                  AssetImage('assets/userIconDark.png'),
+                              // onBackgroundImageError: (exception, stackTrace) =>
+                              //     showSnackBar(context, exception.toString()),
+                              radius: 25,
                             ),
-                          ),
-                        ],
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    userModel.name,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontFamily: "AlegreyaSans",
+                                    ),
+                                  ),
+                                  Text(
+                                    userModel.rollNO ?? "null😅",
+                                    style: const TextStyle(
+                                      fontFamily: "Monospace",
+                                      letterSpacing: 0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SideTitle(titleText: 'Forms'),
-                SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 21),
-                  clipBehavior: Clip.none,
-                  scrollDirection: Axis.horizontal,
-                  child: ref.watch(formsProvider).when(
-                        data: (forms) => Row(
-                          children: forms
-                              .map(
-                                (form) => GestureDetector(
-                                  onTap: () => Routemaster.of(context)
-                                      .push("/form/${form.id}"),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(19),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(17),
-                                      // color: Color.fromRGBO(208, 208, 208, 0.39),
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSecondary,
-                                      // color: Colors.white,
-                                      // border: Border.all(
-                                      //     color: Colors.greenAccent,
-                                      //     ),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          blurRadius: 3,
-                                          spreadRadius: -1,
-                                          color: Colors.black38,
-                                        )
-                                      ],
-                                    ),
-                                    clipBehavior: Clip.none,
-                                    margin: const EdgeInsets.only(
-                                      right: 10,
-                                      bottom: 10,
-                                    ),
-                                    width: 300,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 16 * 1,
-                                          child: Text(
-                                            form.name,
-                                            maxLines: 1,
+                  const SideTitle(titleText: 'Forms'),
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 21),
+                    clipBehavior: Clip.none,
+                    scrollDirection: Axis.horizontal,
+                    child: ref.watch(formsProvider).when(
+                          data: (forms) => Row(
+                            children: forms
+                                .map(
+                                  (form) => GestureDetector(
+                                    onTap: () => Routemaster.of(context)
+                                        .push("/form/${form.id}"),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(19),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(17),
+                                        // color: Color.fromRGBO(208, 208, 208, 0.39),
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSecondary,
+                                        // color: Colors.white,
+                                        // border: Border.all(
+                                        //     color: Colors.greenAccent,
+                                        //     ),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            blurRadius: 3,
+                                            spreadRadius: -1,
+                                            color: Colors.black38,
+                                          )
+                                        ],
+                                      ),
+                                      clipBehavior: Clip.none,
+                                      margin: const EdgeInsets.only(
+                                        right: 10,
+                                        bottom: 10,
+                                      ),
+                                      width: 300,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            height: 16 * 1,
+                                            child: Text(
+                                              form.name,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontFamily: 'NotoSans',
+                                                fontWeight: FontWeight.w800,
+                                                // fontSize: 16,
+                                                height: 1,
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            form.description,
+                                            maxLines: 3,
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
                                               fontFamily: 'NotoSans',
-                                              fontWeight: FontWeight.w800,
-                                              // fontSize: 16,
-                                              height: 1,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 13,
+                                              height: 1.4,
+                                              // color: Colors.black54,
                                             ),
                                           ),
-                                        ),
-                                        Text(
-                                          form.description,
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontFamily: 'NotoSans',
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 13,
-                                            height: 1.4,
-                                            // color: Colors.black54,
+                                          const SizedBox(
+                                            height: 6,
                                           ),
-                                        ),
-                                        const SizedBox(
-                                          height: 6,
-                                        ),
-                                        Text(
-                                          "${form.electiveId} | ${form.regulationId} | ${form.batch}-${form.batch + 4}",
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium!
-                                              .copyWith(
-                                                fontFamily: 'NotoSans',
-                                                fontWeight: FontWeight.w700,
-                                                color: Colors.grey.shade700,
-                                              ),
-                                        ),
-                                      ],
+                                          Text(
+                                            "${form.electiveId} | ${form.regulationId} | ${form.batch}-${form.batch + 4}",
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelMedium!
+                                                .copyWith(
+                                                  fontFamily: 'NotoSans',
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.grey.shade700,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              )
-                              .toList(),
+                                )
+                                .toList(),
+                          ),
+                          error: (error, stackTrace) => Text(error.toString()),
+                          loading: () => const Loader(),
                         ),
-                        error: (error, stackTrace) => Text(error.toString()),
-                        loading: () => const Loader(),
+                  ),
+
+                  // const Text("data"),
+                  // ref.watch(bioProvider) == null
+                  //     ? ElevatedButton(
+                  //         onPressed: () {
+
+                  //           Routemaster.of(context).push("/demo");
+                  //         },
+                  //         child: const Text("get"),
+                  //       )
+                  //     : Column(
+                  //         children: [
+                  //           Text(ref.watch(bioProvider)!.name),
+                  //           Text(ref.watch(bioProvider)!.dob),
+                  //           Text(ref.watch(bioProvider)!.rollNo),
+                  //         ],
+                  //       ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(21),
+                child: Row(
+                  children: [
+                    const Text(
+                      "Developed by ",
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 12,
                       ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        await launchUrl(
+                            Uri.parse('https://linkedin.com/in/Gafoor2005'));
+                      },
+                      child: Text(
+                        "Gafoor",
+                        style: TextStyle(
+                          fontFamily: "NotoSans",
+                          color: Colors.blue.shade900,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-
-                // const Text("data"),
-                // ref.watch(bioProvider) == null
-                //     ? ElevatedButton(
-                //         onPressed: () {
-
-                //           Routemaster.of(context).push("/demo");
-                //         },
-                //         child: const Text("get"),
-                //       )
-                //     : Column(
-                //         children: [
-                //           Text(ref.watch(bioProvider)!.name),
-                //           Text(ref.watch(bioProvider)!.dob),
-                //           Text(ref.watch(bioProvider)!.rollNo),
-                //         ],
-                //       ),
-                const SizedBox(
-                  height: 100,
-                ),
-              ],
-            ),
+              )
+            ],
           );
         }),
       ),

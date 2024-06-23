@@ -218,7 +218,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       height: 62,
                       child: TextButton(
                         onPressed: () async {
-                          await launchUrl(Uri.parse("https://devloopers.me"));
+                          await launchUrl(Uri.parse(
+                              "https://devloopers.me/One/PRIVACY-POLICY"));
                         },
                         style: TextButton.styleFrom(
                           backgroundColor: Color.fromARGB(121, 255, 255, 255),

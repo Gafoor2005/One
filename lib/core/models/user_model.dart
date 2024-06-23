@@ -11,6 +11,7 @@ class UserModel {
   final String oid;
   final String? fcm;
   final String email;
+  final int? out;
   final bool? isAdmin;
   final String? phoneNo;
   final String? rollNO;
@@ -24,6 +25,7 @@ class UserModel {
     required this.oid,
     this.fcm,
     required this.email,
+    this.out,
     this.isAdmin,
     this.phoneNo,
     this.rollNO,
@@ -39,6 +41,7 @@ class UserModel {
     String? oid,
     String? fcm,
     String? email,
+    int? out,
     bool? isAdmin,
     String? phoneNo,
     String? rollNO,
@@ -53,6 +56,7 @@ class UserModel {
       oid: oid ?? this.oid,
       fcm: fcm ?? this.fcm,
       email: email ?? this.email,
+      out: out ?? this.out,
       isAdmin: isAdmin ?? this.isAdmin,
       phoneNo: phoneNo ?? this.phoneNo,
       rollNO: rollNO ?? this.rollNO,
@@ -70,6 +74,7 @@ class UserModel {
       'oid': oid,
       'fcm': fcm,
       'email': email,
+      'out': out,
       'isAdmin': isAdmin,
       'phoneNo': phoneNo,
       'rollNO': rollNO,
@@ -88,12 +93,15 @@ class UserModel {
       oid: map['oid'] as String,
       fcm: map['fcm'] != null ? map['fcm'] as String : null,
       email: map['email'] as String,
+      out: map['out'] != null ? map['out'] as int : null,
       isAdmin: map['isAdmin'] != null ? map['isAdmin'] as bool : null,
       phoneNo: map['phoneNo'] != null ? map['phoneNo'] as String : null,
       rollNO: map['rollNO'] != null ? map['rollNO'] as String : null,
       lastSignInTime:
           DateTime.fromMillisecondsSinceEpoch(map['lastSignInTime'] as int),
       roles: map['roles'] != null
+          // this below line causes ERROR if it is as List<string>
+          // make it as only List
           ? List<String>.from((map['roles'] as List))
           : null,
     );
@@ -106,7 +114,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(displayName: $displayName, name: $name, profilePic: $profilePic, uid: $uid, oid: $oid, fcm: $fcm, email: $email, isAdmin: $isAdmin, phoneNo: $phoneNo, rollNO: $rollNO, lastSignInTime: $lastSignInTime, roles: $roles)';
+    return 'UserModel(displayName: $displayName, name: $name, profilePic: $profilePic, uid: $uid, oid: $oid, fcm: $fcm, email: $email, out: $out, isAdmin: $isAdmin, phoneNo: $phoneNo, rollNO: $rollNO, lastSignInTime: $lastSignInTime, roles: $roles)';
   }
 
   @override
@@ -120,6 +128,7 @@ class UserModel {
         other.oid == oid &&
         other.fcm == fcm &&
         other.email == email &&
+        other.out == out &&
         other.isAdmin == isAdmin &&
         other.phoneNo == phoneNo &&
         other.rollNO == rollNO &&
@@ -136,6 +145,7 @@ class UserModel {
         oid.hashCode ^
         fcm.hashCode ^
         email.hashCode ^
+        out.hashCode ^
         isAdmin.hashCode ^
         phoneNo.hashCode ^
         rollNO.hashCode ^
