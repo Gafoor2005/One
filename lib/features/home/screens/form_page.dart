@@ -38,6 +38,7 @@ class _FormPageState extends ConsumerState<FormPage> {
   }
 
   bool submitted = false;
+  bool available = false;
 
   @override
   void initState() {
@@ -58,131 +59,154 @@ class _FormPageState extends ConsumerState<FormPage> {
         ),
       );
     }
+    if (!available) {
+      ref.watch(formsProvider).whenData((forms) {
+        if (available =
+            forms.map<bool>((e) => e.id == widget.formId).contains(true)) {
+          available = true;
+        }
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.formId),
       ),
-      body: ref.watch(formProvider(widget.formId)).when(
-            data: (form) => ref
-                .watch(subjectsProvider(MyIds(
-                  regulationId: form.regulationId,
-                  electiveId: form.electiveId,
-                ).toJson()))
-                .when(
-                  data: (subjects) => ref
-                      .watch(responsesProvider(widget.formId))
-                      .when(
-                        data: (responses) {
-                          int registerIndex = responses.indexWhere(
-                              (response) => response.rollNumber == rollNumber);
-                          if (registerIndex != -1) {
-                            String registeredCourseId =
-                                responses[registerIndex].courseId;
-                            // log(responses[registerIndex].courseId);
-                            selectedSubject = subjects.singleWhere(
-                                (subject) => subject.id == registeredCourseId);
-                            // log(selectedSubject.toString());
-                            submitted = true;
-                          }
+      body: (available)
+          ? ref.watch(formProvider(widget.formId)).when(
+                data: (form) => ref
+                    .watch(subjectsProvider(MyIds(
+                      regulationId: form.regulationId,
+                      electiveId: form.electiveId,
+                    ).toJson()))
+                    .when(
+                      data: (subjects) => ref
+                          .watch(responsesProvider(widget.formId))
+                          .when(
+                            data: (responses) {
+                              int registerIndex = responses.indexWhere(
+                                  (response) =>
+                                      response.rollNumber == rollNumber);
+                              if (registerIndex != -1) {
+                                String registeredCourseId =
+                                    responses[registerIndex].courseId;
+                                // log(responses[registerIndex].courseId);
+                                selectedSubject = subjects.singleWhere(
+                                    (subject) =>
+                                        subject.id == registeredCourseId);
+                                // log(selectedSubject.toString());
+                                submitted = true;
+                              }
 
-                          return Scaffold(
-                            body: ListView.builder(
-                              itemCount: subjects.length,
-                              itemBuilder: (context, index) {
-                                if (subjects[index].notFor.contains(
-                                    departmentFromRollNumber(
-                                        ref.watch(userProvider)!.rollNO!))) {
-                                  // return Text(subjects[index].name);
-                                  return const SizedBox();
-                                }
-                                int registerCount = responses
-                                    .where((response) =>
-                                        response.courseId == subjects[index].id)
-                                    .length;
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 18.0,
-                                    vertical: 5,
-                                  ),
-                                  child: ChoiceChip(
-                                    padding: const EdgeInsets.all(20),
-                                    label: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            subjects[index].name,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        Text(
-                                            "$registerCount/${subjects[index].limit.toString()}"),
-                                      ],
-                                    ),
-                                    side: const BorderSide(
-                                      color: Colors.black12,
-                                      width: 2,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    selected: (((selectedSubject != null) &&
-                                                (registerCount <
-                                                    subjects[index].limit)) ||
-                                            (submitted))
-                                        ? (selectedSubject!.id ==
+                              return Scaffold(
+                                body: ListView.builder(
+                                  itemCount: subjects.length,
+                                  itemBuilder: (context, index) {
+                                    if (subjects[index].notFor.contains(
+                                        departmentFromRollNumber(ref
+                                            .watch(userProvider)!
+                                            .rollNO!))) {
+                                      // return Text(subjects[index].name);
+                                      return const SizedBox();
+                                    }
+                                    int registerCount = responses
+                                        .where((response) =>
+                                            response.courseId ==
                                             subjects[index].id)
-                                        : false,
-                                    onSelected: ((registerCount >=
-                                                subjects[index].limit) ||
-                                            submitted)
-                                        ? null
-                                        : (value) {
-                                            (value)
-                                                ? selectedSubject =
-                                                    subjects[index]
-                                                : selectedSubject = null;
-                                            // log(selectedSubject.toString());
-                                            setState(() {});
-                                          },
+                                        .length;
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 18.0,
+                                        vertical: 5,
+                                      ),
+                                      child: ChoiceChip(
+                                        padding: const EdgeInsets.all(20),
+                                        label: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                subjects[index].name,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            Text(
+                                                "$registerCount/${subjects[index].limit.toString()}"),
+                                          ],
+                                        ),
+                                        side: const BorderSide(
+                                          color: Colors.black12,
+                                          width: 2,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        selected: (((selectedSubject != null) &&
+                                                    (registerCount <
+                                                        subjects[index]
+                                                            .limit)) ||
+                                                (submitted))
+                                            ? (selectedSubject!.id ==
+                                                subjects[index].id)
+                                            : false,
+                                        onSelected: ((registerCount >=
+                                                    subjects[index].limit) ||
+                                                submitted)
+                                            ? null
+                                            : (value) {
+                                                (value)
+                                                    ? selectedSubject =
+                                                        subjects[index]
+                                                    : selectedSubject = null;
+                                                // log(selectedSubject.toString());
+                                                setState(() {});
+                                              },
+                                      ),
+                                    );
+                                  },
+                                ),
+                                bottomNavigationBar: BottomAppBar(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      SizedBox(
+                                        width: 200,
+                                        child: LargeButton(
+                                            onTap: ((selectedSubject != null) &&
+                                                    !(submitted) &&
+                                                    responses
+                                                            .where((response) =>
+                                                                response
+                                                                    .courseId ==
+                                                                selectedSubject!
+                                                                    .id)
+                                                            .length <
+                                                        selectedSubject!.limit)
+                                                ? () => submitForm()
+                                                : null,
+                                            text: "submit"),
+                                      ),
+                                    ],
                                   ),
-                                );
-                              },
-                            ),
-                            bottomNavigationBar: BottomAppBar(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  SizedBox(
-                                    width: 200,
-                                    child: LargeButton(
-                                        onTap: ((selectedSubject != null) &&
-                                                !(submitted) &&
-                                                responses
-                                                        .where((response) =>
-                                                            response.courseId ==
-                                                            selectedSubject!.id)
-                                                        .length <
-                                                    selectedSubject!.limit)
-                                            ? () => submitForm()
-                                            : null,
-                                        text: "submit"),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                        error: (error, stackTrace) => Text(error.toString()),
-                        loading: () => const Loader(),
-                      ),
-                  error: (error, stackTrace) => Text(error.toString()),
-                  loading: () => const Loader(),
-                ),
-            error: (error, stackTrace) => Text(error.toString()),
-            loading: () => const Loader(),
-          ),
+                                ),
+                              );
+                            },
+                            error: (error, stackTrace) =>
+                                Text(error.toString()),
+                            loading: () => const Loader(),
+                          ),
+                      error: (error, stackTrace) => Text(error.toString()),
+                      loading: () => const Loader(),
+                    ),
+                error: (error, stackTrace) => Text(error.toString()),
+                loading: () => const Loader(),
+              )
+          : const Padding(
+              padding: EdgeInsets.all(21.0),
+              child: Text("this form is currently not active"),
+            ),
     );
   }
 }

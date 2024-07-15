@@ -30,6 +30,9 @@ final waitingRoute = RouteMap(routes: {
   '/': (_) => const MaterialPage(child: ChatPage()),
 });
 final loggedOutRoute = RouteMap(routes: {
+  '/create-form': (info) => const MaterialPage(
+        child: LoginPage(),
+      ),
   '/form/:id': (info) => const MaterialPage(
         child: LoginPage(),
       ),

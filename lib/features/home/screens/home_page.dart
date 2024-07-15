@@ -109,91 +109,98 @@ class HomePage extends ConsumerWidget {
                     clipBehavior: Clip.none,
                     scrollDirection: Axis.horizontal,
                     child: ref.watch(formsProvider).when(
-                          data: (forms) => Row(
-                            children: forms
-                                .map(
-                                  (form) => GestureDetector(
-                                    onTap: () => Routemaster.of(context)
-                                        .push("/form/${form.id}"),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(19),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(17),
-                                        // color: Color.fromRGBO(208, 208, 208, 0.39),
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSecondary,
-                                        // color: Colors.white,
-                                        // border: Border.all(
-                                        //     color: Colors.greenAccent,
-                                        //     ),
-                                        boxShadow: const [
-                                          BoxShadow(
-                                            blurRadius: 3,
-                                            spreadRadius: -1,
-                                            color: Colors.black38,
-                                          )
-                                        ],
-                                      ),
-                                      clipBehavior: Clip.none,
-                                      margin: const EdgeInsets.only(
-                                        right: 10,
-                                        bottom: 10,
-                                      ),
-                                      width: 300,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(
-                                            height: 16 * 1,
-                                            child: Text(
-                                              form.name,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontFamily: 'NotoSans',
-                                                fontWeight: FontWeight.w800,
-                                                // fontSize: 16,
-                                                height: 1,
-                                              ),
+                          data: (forms) => (forms.isEmpty)
+                              ? const Text("currently no forms available")
+                              : Row(
+                                  children: forms
+                                      .map(
+                                        (form) => GestureDetector(
+                                          onTap: () => Routemaster.of(context)
+                                              .push("/form/${form.id}"),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(19),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(17),
+                                              // color: Color.fromRGBO(208, 208, 208, 0.39),
+                                              color: Colors.black12,
+                                              // color: Colors.white,
+                                              // border: Border.all(
+                                              //     color: Colors.greenAccent,
+                                              //     ),
+                                              // boxShadow: const [
+                                              //   BoxShadow(
+                                              //     blurRadius: 3,
+                                              //     spreadRadius: -1,
+                                              //     color: Colors.black38,
+                                              //   )
+                                              // ],
                                             ),
-                                          ),
-                                          Text(
-                                            form.description,
-                                            maxLines: 3,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontFamily: 'NotoSans',
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 13,
-                                              height: 1.4,
-                                              // color: Colors.black54,
+                                            clipBehavior: Clip.none,
+                                            margin: const EdgeInsets.only(
+                                              right: 10,
+                                              bottom: 10,
                                             ),
-                                          ),
-                                          const SizedBox(
-                                            height: 6,
-                                          ),
-                                          Text(
-                                            "${form.electiveId} | ${form.regulationId} | ${form.batch}-${form.batch + 4}",
-                                            maxLines: 3,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelMedium!
-                                                .copyWith(
-                                                  fontFamily: 'NotoSans',
-                                                  fontWeight: FontWeight.w700,
-                                                  color: Colors.grey.shade700,
+                                            width: 300,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(
+                                                  height: 16 * 1,
+                                                  child: Text(
+                                                    form.name,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontFamily: 'NotoSans',
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      // fontSize: 16,
+                                                      height: 1,
+                                                    ),
+                                                  ),
                                                 ),
+                                                Text(
+                                                  form.description,
+                                                  maxLines: 3,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    fontFamily: 'NotoSans',
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 13,
+                                                    height: 1.4,
+                                                    // color: Colors.black54,
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  height: 6,
+                                                ),
+                                                Text(
+                                                  "${form.electiveId} | ${form.regulationId} | ${form.batch}-${form.batch + 4}",
+                                                  maxLines: 3,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelMedium!
+                                                      .copyWith(
+                                                        fontFamily: 'NotoSans',
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color: Colors
+                                                            .grey.shade700,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
                           error: (error, stackTrace) => Text(error.toString()),
                           loading: () => const Loader(),
                         ),
@@ -221,29 +228,69 @@ class HomePage extends ConsumerWidget {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.all(21),
+                padding: const EdgeInsets.symmetric(horizontal: 21),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
-                      "Developed by ",
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 21.0),
+                      child: Row(
+                        children: [
+                          const Text(
+                            "Developed by ",
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 12,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              await launchUrl(Uri.parse(
+                                  'https://linkedin.com/in/Gafoor2005'));
+                            },
+                            child: Text(
+                              "Gafoor",
+                              style: TextStyle(
+                                fontFamily: "NotoSans",
+                                color: Colors.blue.shade900,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () async {
-                        await launchUrl(
-                            Uri.parse('https://linkedin.com/in/Gafoor2005'));
-                      },
-                      child: Text(
-                        "Gafoor",
-                        style: TextStyle(
-                          fontFamily: "NotoSans",
-                          color: Colors.blue.shade900,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () async {
+                              await launchUrl(Uri.parse(
+                                  'https://github.com/Gafoor2005/One'));
+                            },
+                            icon: SvgPicture.asset(
+                              "assets/icons/github.svg",
+                              height: 25,
+                              width: 25,
+                            ),
+                          ),
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () async {
+                              await launchUrl(
+                                  Uri.parse('https://devloopers.me/discord'));
+                            },
+                            icon: SvgPicture.asset(
+                              "assets/icons/discord.svg",
+                              height: 25,
+                              width: 25,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
