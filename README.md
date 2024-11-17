@@ -14,7 +14,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference. -->
-## [Download](https://github.com/Gafoor2005/One/releases/latest) latest release apk.
+## [Download](https://github.com/Gafoor2005/One/releases/latest) now on Google Play 
 
 only use your __student id__ provided by __my college__ to sign-in into the app
 
